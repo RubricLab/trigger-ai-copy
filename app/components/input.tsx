@@ -5,6 +5,7 @@ import React, { useEffect, useId, useState } from "react";
 
 type Props = {
   label: string;
+  name?: string;
   type?: string;
   required?: boolean;
   placeholder?: string;
@@ -15,6 +16,7 @@ type Props = {
 
 function Input({
   label,
+  name,
   type = "text",
   required = false,
   placeholder,
@@ -36,9 +38,10 @@ function Input({
       </label>
       <div className="relative">
         <input
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
           id={inputId}
+          value={value}
+          name={name}
+          onChange={(e) => setValue(e.target.value)}
           type={type}
           required={required}
           placeholder={placeholder}
