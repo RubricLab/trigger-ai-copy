@@ -10,7 +10,7 @@ client.defineJob({
     name: "generate.event",
     schema: z.object({
       heading1: z.string(),
-    }),
+    }) as any,
   }),
   integrations: {
     openai,

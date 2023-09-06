@@ -5,20 +5,23 @@ import Input from "./input";
 import { validateUrl } from "../utils";
 import { sendText } from "../actions";
 import { Button } from "./button";
-import { experimental_useFormStatus as useFormStatus } from "react-dom";
+import { useEventRunDetails } from "@trigger.dev/react";
 
-function dashboard() {
+function Dashboard() {
   const [pageUrl, setPageUrl] = useState("");
   const [message, setMessage] = useState("");
+  const [runId, setRunId] = useState("");
 
   const validUrl = useMemo(() => validateUrl(pageUrl), [pageUrl]);
 
   async function onSubmit(formData: FormData) {
     const res = await sendText(formData);
-    setMessage(res.payload?.message?.content || "?");
+
+    setRunId(res.id);
+    setMessage("complete");
   }
 
-  const { pending } = useFormStatus();
+  const { isLoading, isError, data, error } = useEventRunDetails(runId);
 
   return (
     <div className="grid grid-cols-2 w-full grow p-12">
@@ -46,14 +49,17 @@ function dashboard() {
             placeholder="Develop. Preview. Deploy."
             name="heading1"
           />
-          <Button disabled={pending}>
-            {pending ? "Loading..." : "Generate"}
+          <Button disabled={isLoading}>
+            {isLoading ? "Loading..." : "Generate"}
           </Button>
-          <div>{message}</div>
+          <div>message: {message}</div>
+          <div>isError:{isError}</div>
+          <div>data:{data?.status}</div>
+          <div>error:{error?.message}</div>
         </form>
       </div>
     </div>
   );
 }
 
-export default dashboard;
+export default Dashboard;

@@ -29,7 +29,7 @@ function Input({
 
   useEffect(() => {
     onChange?.(value);
-  }, [value]);
+  }, [onChange, value]);
 
   return (
     <div className="space-y-1 w-full max-w-xs">
