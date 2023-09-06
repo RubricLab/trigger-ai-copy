@@ -31,7 +31,7 @@ function Input({
 
   return (
     <div className="space-y-1 w-full max-w-xs">
-      <label className="text-gray-700 font-semibold" htmlFor={inputId}>
+      <label className="font-semibold" htmlFor={inputId}>
         {label}
       </label>
       <div className="relative">
@@ -42,11 +42,11 @@ function Input({
           type={type}
           required={required}
           placeholder={placeholder}
-          className={`${className} p-2 pr-8 rounded-md border border-gray-300 focus:outline-none focus:ring-4 ring-indigo-500/60 focus:border-indigo-500/60 w-full`}
+          className={`${className} p-2 pr-8 rounded-md border border-gray-700 bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-4 ring-indigo-500/80 focus:border-opacity-0 w-full transition-colors`}
         />
         {clearable && (
           <button
-            className={`p-2 absolute right-0 inset-y-0 hover:text-red-500 transition-opacity duration-500 focus:outline-none ${
+            className={`p-2 absolute right-0 inset-y-0 hover:text-red-400 transition-opacity focus:outline-none ${
               value ? "opacity-100" : "opacity-0"
             }`}
             onClick={() => setValue("")}

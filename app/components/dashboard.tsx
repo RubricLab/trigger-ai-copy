@@ -10,18 +10,23 @@ function dashboard() {
   const validUrl = useMemo(() => validateUrl(pageUrl), [pageUrl]);
 
   return (
-    <div className="grid grid-cols-2 w-full grow border p-12">
+    <div className="grid grid-cols-2 w-full grow p-12">
       <div className="flex flex-col items-start gap-8">
         <Input
           label="Your landing page:"
-          className={validUrl ? "!border-green-600/60 !ring-green-600/60" : ""}
+          className={validUrl ? "!ring-green-400/60" : ""}
           placeholder="trigger.dev"
           onChange={(val) => setPageUrl(val)}
           type="url"
           required
           clearable
         />
-        {validUrl && <iframe src={validUrl} className="h-full w-full" />}
+        {validUrl && (
+          <iframe
+            src={validUrl}
+            className="h-full w-full rounded-lg border border-gray-600/60"
+          />
+        )}
       </div>
     </div>
   );
