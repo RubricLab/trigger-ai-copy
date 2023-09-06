@@ -14,3 +14,14 @@ export async function sendText(data: FormData) {
 
   return res;
 }
+
+export async function readHeadings(url: string) {
+  const res = await client.sendEvent({
+    name: "read-headings.event",
+    payload: {
+      url,
+    },
+  });
+
+  return res;
+}

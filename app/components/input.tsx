@@ -33,7 +33,7 @@ function Input({
 
   return (
     <div className="space-y-1 w-full max-w-sm">
-      <label className="font-semibold" htmlFor={inputId}>
+      <label className="font-medium" htmlFor={inputId}>
         {label}
       </label>
       <div className="relative">
