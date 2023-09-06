@@ -42,7 +42,7 @@ function Input({
           type={type}
           required={required}
           placeholder={placeholder}
-          className={`${className} p-2 pr-8 rounded-md border border-gray-700 bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-4 ring-indigo-500/80 focus:border-opacity-0 w-full transition-colors`}
+          className={`${className} p-2 pr-8 rounded-md border border-midnight-700 bg-midnight-850 hover:bg-midnight-800 focus:outline-none focus:ring-4 ring-indigo-500/80 focus:border-opacity-0 w-full transition-colors`}
         />
         {clearable && (
           <button

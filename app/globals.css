@@ -4,7 +4,7 @@
 
 @layer base {
   html {
-    @apply bg-gray-950 text-gray-200;
+    @apply bg-midnight-900 text-bright;
   }
   a {
     @apply hover:text-blue-400 transition-colors;

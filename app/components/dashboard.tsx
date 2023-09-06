@@ -24,7 +24,7 @@ function dashboard() {
         {validUrl && (
           <iframe
             src={validUrl}
-            className="h-full w-full rounded-lg border border-gray-600/60"
+            className="h-full w-full rounded-lg border border-midnight-600 border-opacity-60"
           />
         )}
       </div>
