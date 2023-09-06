@@ -29,10 +29,10 @@ function Input({
 
   useEffect(() => {
     onChange?.(value);
-  }, [onChange, value]);
+  }, [value]);
 
   return (
-    <div className="space-y-1 w-full max-w-xs">
+    <div className="space-y-1 w-full max-w-sm">
       <label className="font-semibold" htmlFor={inputId}>
         {label}
       </label>

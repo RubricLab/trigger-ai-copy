@@ -1,3 +1,4 @@
+import { TriggerProvider } from "@trigger.dev/react";
 import "./globals.css";
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
@@ -19,7 +20,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={poppins.className}>{children}</body>
+      <body className={poppins.className}>
+        <TriggerProvider
+          publicApiKey={process.env.NEXT_PUBLIC_CLIENT_TRIGGER_API_KEY ?? ""}
+          apiUrl={process.env.NEXT_PUBLIC_TRIGGER_API_URL}
+        >
+          {children}
+        </TriggerProvider>
+      </body>
     </html>
   );
 }

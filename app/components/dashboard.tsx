@@ -6,6 +6,7 @@ import { validateUrl } from "../utils";
 import { sendText } from "../actions";
 import { Button } from "./button";
 import { useEventRunDetails } from "@trigger.dev/react";
+import ProgressItem from "./progressItem";
 
 function Dashboard() {
   const [pageUrl, setPageUrl] = useState("");
@@ -21,7 +22,7 @@ function Dashboard() {
     setMessage("complete");
   }
 
-  const { isLoading, isError, data, error } = useEventRunDetails(runId);
+  const { isLoading, data, error } = useEventRunDetails(runId);
 
   return (
     <div className="grid grid-cols-2 w-full grow p-12">
@@ -43,7 +44,7 @@ function Dashboard() {
         )}
       </div>
       <div className="flex flex-col items-start gap-8">
-        <form action={onSubmit} className="space-y-4">
+        <form action={onSubmit} className="space-y-4 w-full">
           <Input
             label="Heading 1"
             placeholder="Develop. Preview. Deploy."
@@ -52,11 +53,33 @@ function Dashboard() {
           <Button disabled={isLoading}>
             {isLoading ? "Loading..." : "Generate"}
           </Button>
-          <div>message: {message}</div>
-          <div>isError:{isError}</div>
-          <div>data:{data?.status}</div>
-          <div>error:{error?.message}</div>
         </form>
+        <div className="space-y-3">
+          <ProgressItem
+            state={!data?.tasks?.length ? "progress" : "completed"}
+            name="Starting up"
+          />
+          {data?.tasks?.map((task) => (
+            <ProgressItem
+              key={task.id}
+              state={
+                task.status === "COMPLETED"
+                  ? "completed"
+                  : task.status === "ERRORED"
+                  ? "failed"
+                  : "progress"
+              }
+              name={task.displayKey ?? task.name ?? ""}
+              icon={task.icon}
+            />
+          ))}
+          {data?.output && data.status === "SUCCESS" && (
+            <ProgressItem
+              state="completed"
+              name={data.output.message.content}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

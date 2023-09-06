@@ -2,6 +2,9 @@ import { eventTrigger } from "@trigger.dev/sdk";
 import { client, openai } from "@/trigger";
 import { z } from "zod";
 
+/**
+ * Trigger.dev job to generate copy with OpenAI's gpt-3.5-turbo model
+ */
 client.defineJob({
   id: "generate",
   name: "Generate copy with OpenAI",
@@ -15,22 +18,29 @@ client.defineJob({
   integrations: {
     openai,
   },
-  run: async (payload, io, ctx) => {
-    // This background function can take longer than a serverless timeout
+  run: async (payload, io, _) => {
+    const prefix =
+      "Re-write the following landing page heading(s) to be more impactful:";
+    const headings = payload.heading1;
+    const prompt = `${prefix}\n\n${headings}`;
+
     const response = await io.openai.backgroundCreateChatCompletion(
-      "background-chat-completion",
+      "openai-completions-api",
       {
         model: "gpt-3.5-turbo",
         messages: [
           {
             role: "user",
-            content:
-              "write an impactful heading for a landing page of a SaaS selling Uber for dogs",
+            content: prompt,
           },
         ],
       }
     );
 
-    await io.logger.info("choices", response.choices);
+    if (!response?.choices?.length) {
+      throw new Error("No response from OpenAI");
+    }
+
+    return response.choices[0];
   },
 });
