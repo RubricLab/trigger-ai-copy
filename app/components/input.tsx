@@ -1,7 +1,7 @@
 "use client";
 
 import { Cross2Icon } from "@radix-ui/react-icons";
-import React, { useId, useState } from "react";
+import React, { useCallback, useId, useState } from "react";
 
 type Props = {
   label: string;
@@ -9,6 +9,7 @@ type Props = {
   required?: boolean;
   placeholder?: string;
   clearable?: boolean;
+  onChange?: (value: string) => void;
 };
 
 function Input({
@@ -17,9 +18,18 @@ function Input({
   required = false,
   placeholder,
   clearable = false,
+  onChange,
 }: Props) {
   const [value, setValue] = useState("");
   const inputId = useId();
+
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setValue(e.target.value);
+      onChange?.(e.target.value);
+    },
+    [onChange]
+  );
 
   return (
     <div className="space-y-1 w-full max-w-xs">
@@ -29,7 +39,7 @@ function Input({
       <div className="relative">
         <input
           value={value}
-          onChange={(e) => setValue(e.target.value)}
+          onChange={handleChange}
           id={inputId}
           type={type}
           required={required}

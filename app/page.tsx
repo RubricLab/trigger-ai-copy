@@ -1,15 +1,11 @@
-import Input from "./components/input";
+import Dashboard from "./components/dashboard";
+import Header from "./components/header";
 
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <Input
-        label="Your landing page:"
-        type="url"
-        required
-        placeholder="trigger.dev"
-        clearable
-      />
+      <Header />
+      <Dashboard />
     </main>
   );
 }
