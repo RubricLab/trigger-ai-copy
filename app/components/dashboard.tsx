@@ -25,7 +25,7 @@ function Dashboard() {
   const { isLoading, data, error } = useEventRunDetails(runId);
 
   return (
-    <div className="grid grid-cols-2 w-full grow p-12">
+    <div className="grid grid-cols-2 space-x-12 w-full grow p-12">
       <div className="flex flex-col items-start gap-8">
         <Input
           label="Your landing page:"
