@@ -1,5 +1,5 @@
-import puppeteer from '@cloudflare/puppeteer';
-import { load } from 'cheerio';
+import puppeteer from "@cloudflare/puppeteer";
+import { load } from "cheerio";
 export interface Env {
 	BROWSER: Fetcher;
 }
@@ -10,10 +10,10 @@ export interface Env {
 export default {
 	async fetch(request: Request, env: Env): Promise<Response> {
 		const { searchParams } = new URL(request.url);
-		let url = searchParams.get('url');
+		let url = searchParams.get("url");
 
 		if (!url) {
-			return new Response('Please add an ?url=https://example.com/ parameter');
+			return new Response("Please add an ?url=https://example.com/ parameter");
 		}
 
 		// Normalize URL
@@ -28,9 +28,9 @@ export default {
 			// Select all headings in page
 			const data = await page.content();
 			const querySelector = load(data);
-			const headingElements = querySelector('h1, h2, h3');
+			const headingElements = querySelector("h1, h2, h3");
 
-			console.log('Headings collected');
+			console.log("Headings collected");
 
 			const headings: { tag: string; text: string }[] = [];
 			headingElements.each((_, element) => {
@@ -44,12 +44,12 @@ export default {
 
 			return new Response(JSON.stringify(headings), {
 				headers: {
-					'content-type': 'application/json',
+					"content-type": "application/json",
 				},
 			});
 		} catch (error) {
-			console.error('Failed to read page', error);
-			return new Response('Failed to read page', { status: 500 });
+			console.error("Failed to read page", error);
+			return new Response("Failed to read page", { status: 500 });
 		}
 	},
 };
