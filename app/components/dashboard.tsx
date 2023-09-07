@@ -66,7 +66,7 @@ function Dashboard() {
           {headingsLoading && <p>Loading headings...</p>}
           {headingsData?.output && (
             <div className="space-y-4 text-center">
-              {headingsData?.output.map(
+              {headingsData?.output?.map?.(
                 (
                   { tag, text }: { tag: string; text: string },
                   index: number

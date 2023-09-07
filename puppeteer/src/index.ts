@@ -1,32 +1,52 @@
-/**
- * Welcome to Cloudflare Workers! This is your first worker.
- *
- * - Run `npm run dev` in your terminal to start a development server
- * - Open a browser tab at http://localhost:8787/ to see your worker in action
- * - Run `npm run deploy` to publish your worker
- *
- * Learn more at https://developers.cloudflare.com/workers/
- */
-
+import puppeteer from '@cloudflare/puppeteer';
+import { load } from 'cheerio';
 export interface Env {
-	// Example binding to KV. Learn more at https://developers.cloudflare.com/workers/runtime-apis/kv/
-	// MY_KV_NAMESPACE: KVNamespace;
-	//
-	// Example binding to Durable Object. Learn more at https://developers.cloudflare.com/workers/runtime-apis/durable-objects/
-	// MY_DURABLE_OBJECT: DurableObjectNamespace;
-	//
-	// Example binding to R2. Learn more at https://developers.cloudflare.com/workers/runtime-apis/r2/
-	// MY_BUCKET: R2Bucket;
-	//
-	// Example binding to a Service. Learn more at https://developers.cloudflare.com/workers/runtime-apis/service-bindings/
-	// MY_SERVICE: Fetcher;
-	//
-	// Example binding to a Queue. Learn more at https://developers.cloudflare.com/queues/javascript-apis/
-	// MY_QUEUE: Queue;
+	BROWSER: Fetcher;
 }
 
 export default {
-	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-		return new Response('Hello World!');
+	async fetch(request: Request, env: Env): Promise<Response> {
+		const { searchParams } = new URL(request.url);
+
+		let url = searchParams.get('url');
+
+		if (url) {
+			url = new URL(url).toString();
+
+			try {
+				// TODO: remove console.logs
+				console.log('env.BROWSER', env.BROWSER);
+
+				const browser = await puppeteer.launch(env.BROWSER);
+
+				const page = await browser.newPage();
+				await page.goto(url);
+
+				const content = await page.content();
+				const querySelector = load(content);
+				const headingElements = querySelector('h1, h2, h3');
+
+				const headings: { tag: string; text: string }[] = [];
+				headingElements.each((_, element) => {
+					headings.push({
+						tag: element.tagName,
+						text: querySelector(element).text(),
+					});
+				});
+
+				await browser.close();
+
+				return new Response(JSON.stringify(headings), {
+					headers: {
+						'content-type': 'application/json',
+					},
+				});
+			} catch (error) {
+				console.error('Failed to read page', error);
+				return new Response('Failed to read page', { status: 500 });
+			}
+		} else {
+			return new Response('Please add an ?url=https://example.com/ parameter');
+		}
 	},
 };
