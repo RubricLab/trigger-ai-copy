@@ -1,6 +1,6 @@
 import { CheckCircledIcon, CrossCircledIcon } from "@radix-ui/react-icons";
 import React from "react";
-import { Spinner } from "./spinner";
+import { Spinner } from "./Spinner";
 import { CompanyIcon } from "@trigger.dev/companyicons";
 
 type ProgressItemProps = {

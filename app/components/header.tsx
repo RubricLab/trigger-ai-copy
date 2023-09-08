@@ -1,7 +1,7 @@
 import { GitHubLogoIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 import React from "react";
-import TriggerLogo from "./triggerLogo";
+import TriggerLogo from "./TriggerLogo";
 
 function Header() {
   return (

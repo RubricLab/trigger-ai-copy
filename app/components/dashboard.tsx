@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import Input from "./input";
+import Input from "./Input";
 import { validateUrl } from "../utils";
 import { readHeadings, sendText } from "../actions";
-import { Button } from "./button";
+import { Button } from "./Button";
 import { useEventRunDetails } from "@trigger.dev/react";
-import ProgressItem from "./progressItem";
+import ProgressItem from "./ProgressItem";
 
 function Dashboard() {
   const [pageUrl, setPageUrl] = useState("");
