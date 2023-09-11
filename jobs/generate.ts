@@ -21,6 +21,7 @@ client.defineJob({
   run: async (payload, io, _) => {
     const prefix = `
     Re-write the following landing page heading(s) to be more impactful.
+    Limit prose.
     Separate headings with a newline.
     `;
     const { headings } = payload;
@@ -47,6 +48,9 @@ client.defineJob({
       throw new Error("OpenAI failed to return a response");
     }
 
-    return response.choices[0];
+    return {
+      message: "Success!",
+      headings: response.choices[0].message.content,
+    };
   },
 });
