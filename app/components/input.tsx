@@ -4,11 +4,12 @@ import { Cross2Icon } from "@radix-ui/react-icons";
 import React, { useEffect, useId, useState } from "react";
 
 type Props = {
-  label: string;
+  label?: string;
   name?: string;
   type?: string;
   required?: boolean;
   placeholder?: string;
+  initialValue?: string;
   clearable?: boolean;
   onChange?: (value: string) => void;
   className?: string;
@@ -20,11 +21,12 @@ function Input({
   type = "text",
   required = false,
   placeholder,
+  initialValue,
   clearable = false,
   onChange,
   className,
 }: Props) {
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState(initialValue || "");
   const inputId = useId();
 
   useEffect(() => {
@@ -32,10 +34,12 @@ function Input({
   }, [value]);
 
   return (
-    <div className="space-y-1 w-full max-w-sm">
-      <label className="font-medium" htmlFor={inputId}>
-        {label}
-      </label>
+    <div className="space-y-1 w-full max-w-md">
+      {label && (
+        <label className="font-medium" htmlFor={inputId}>
+          {label}
+        </label>
+      )}
       <div className="relative">
         <input
           id={inputId}

@@ -12,17 +12,21 @@ client.defineJob({
   trigger: eventTrigger({
     name: "generate.event",
     schema: z.object({
-      heading1: z.string(),
+      headings: z.array(z.string()),
     }) as any,
   }),
   integrations: {
     openai,
   },
   run: async (payload, io, _) => {
-    const prefix =
-      "Re-write the following landing page heading(s) to be more impactful:";
-    const headings = payload.heading1;
-    const prompt = `${prefix}\n\n${headings}`;
+    const prefix = `
+    Re-write the following landing page heading(s) to be more impactful.
+    Separate headings with a newline.
+    `;
+    const { headings } = payload;
+    const prompt = `${prefix}\n\n${headings.join("\n")}`;
+
+    io.logger.info("Generating text...");
 
     const response = await io.openai.backgroundCreateChatCompletion(
       "openai-completions-api",
@@ -37,8 +41,10 @@ client.defineJob({
       }
     );
 
+    io.logger.info("Generated new headings!");
+
     if (!response?.choices?.length) {
-      throw new Error("No response from OpenAI");
+      throw new Error("OpenAI failed to return a response");
     }
 
     return response.choices[0];

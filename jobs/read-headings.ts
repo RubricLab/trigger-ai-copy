@@ -33,16 +33,19 @@ client.defineJob({
       const headings: { tag: string; text: string }[] = [];
       headingElements.each((_, element) => {
         headings.push({
-          tag: element.tagName,
+          tag: element.tagName.trim().toUpperCase(),
           text: queryFunction(element).text(),
         });
       });
 
-      return headings;
+      return {
+        message: "Fetched headings!",
+        headings,
+      };
     } catch (error) {
       io.logger.error("Failed to read page", { error });
 
-      return { error: "Failed to read page" };
+      throw new Error("Failed to read page");
     }
   },
 });

@@ -2,13 +2,11 @@
 
 import { client } from "@/trigger";
 
-export async function sendText(data: FormData) {
-  const heading1 = data.get("heading1");
-
+export async function generateHeadings(headings: string[]) {
   const res = await client.sendEvent({
     name: "generate.event",
     payload: {
-      heading1,
+      headings,
     },
   });
 

@@ -1,43 +1,50 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import Input from "./Input";
-import { validateUrl } from "../utils";
-import { readHeadings, sendText } from "../actions";
+import { validateUrl } from "@/utils";
+import { readHeadings, generateHeadings } from "../actions";
 import { Button } from "./Button";
 import { useEventRunDetails } from "@trigger.dev/react";
 import ProgressItem from "./ProgressItem";
+import { Heading } from "@/types";
 
 function Dashboard() {
   const [pageUrl, setPageUrl] = useState("");
-  // TODO: refactor 2 columns of dashboard into 2 components for readability
   const [generateRunId, setGenerateRunId] = useState("");
   const [headingsRunId, setHeadingsRunId] = useState("");
 
   const validUrl = useMemo(() => validateUrl(pageUrl), [pageUrl]);
 
-  async function onSubmit(formData: FormData) {
-    const res = await sendText(formData);
+  const onSubmit = async (formData: FormData) => {
+    const headings = formData.getAll("heading").map((h) => h.toString());
+
+    const res = await generateHeadings(headings);
 
     setGenerateRunId(res.id);
-  }
+  };
 
-  useEffect(() => {
-    const run = async () => {
-      if (validUrl) {
-        const res = await readHeadings(validUrl);
+  const fetchHeadings = useCallback(async () => {
+    if (validUrl) {
+      const res = await readHeadings(validUrl);
 
-        setHeadingsRunId(res.id);
-      }
-    };
-
-    run();
+      setHeadingsRunId(res.id);
+    }
   }, [validUrl]);
 
-  const { isLoading, data } = useEventRunDetails(generateRunId);
-  const { isLoading: headingsLoading, data: headingsData } =
-    useEventRunDetails(headingsRunId);
+  const {
+    data: headings,
+    isLoading: headingsLoading,
+    error: headingsError,
+  } = useEventRunDetails(headingsRunId);
 
+  const {
+    data: aiHeadings,
+    isLoading: aiHeadingsLoading,
+    error: aiHeadingsError,
+  } = useEventRunDetails(generateRunId);
+
+  // TODO: componentize two columns (lots in common)
   return (
     <div className="grid grid-cols-2 space-x-12 w-full grow p-12">
       <div className="flex flex-col items-start gap-8">
@@ -50,50 +57,21 @@ function Dashboard() {
           required
           clearable
         />
-        {validUrl && (
-          <div className="grow w-full space-y-2">
-            <h2>Current site:</h2>
-            <iframe
-              src={validUrl}
-              className="h-full w-full rounded-lg border border-midnight-600 border-opacity-60"
-            />
-          </div>
-        )}
-      </div>
-      <div className="flex flex-col items-start gap-8 pt-24">
-        <h2>Headings:</h2>
-        <form action={onSubmit} className="space-y-4 w-full pt-32">
-          {headingsLoading && <p>Loading headings...</p>}
-          {headingsData?.output && (
-            <div className="space-y-4 text-center">
-              {headingsData?.output?.map?.(
-                (
-                  { tag, text }: { tag: string; text: string },
-                  index: number
-                ) => (
-                  <div key={index}>
-                    {tag === "h1" ? (
-                      <h1>{text}</h1>
-                    ) : tag === "h2" ? (
-                      <h2>{text}</h2>
-                    ) : (
-                      <h3>{text}</h3>
-                    )}
-                  </div>
-                )
-              )}
-            </div>
-          )}
-          <Button disabled={isLoading}>
-            {isLoading ? "Loading..." : "Generate"}
-          </Button>
-        </form>
+        <Button disabled={!validUrl || headingsLoading} onClick={fetchHeadings}>
+          Get headings
+        </Button>
         <div className="space-y-3">
           <ProgressItem
-            state={!data?.tasks?.length ? "progress" : "completed"}
             name="Starting up"
+            state={
+              headingsError
+                ? "failed"
+                : headings?.tasks?.length
+                ? "completed"
+                : "progress"
+            }
           />
-          {data?.tasks?.map((task) => (
+          {headings?.tasks?.map((task) => (
             <ProgressItem
               key={task.id}
               state={
@@ -103,15 +81,83 @@ function Dashboard() {
                   ? "failed"
                   : "progress"
               }
-              name={task.displayKey ?? task.name ?? ""}
+              name={task.displayKey || task.name || ""}
               icon={task.icon}
             />
           ))}
-          {data?.output && data.status === "SUCCESS" && (
+          {headings?.output && (
+            <ProgressItem
+              state={headings.status === "SUCCESS" ? "completed" : "failed"}
+              name={headings.output.message}
+            />
+          )}
+        </div>
+        {headings && (
+          <>
+            <h2>Headings:</h2>
+            <form action={onSubmit} className="space-y-4 w-full">
+              <div className="grow w-full space-y-2">
+                {headings?.output && (
+                  <div className="space-y-4">
+                    <Button disabled={aiHeadingsLoading}>
+                      {aiHeadingsLoading
+                        ? "Loading..."
+                        : "Generate new headings"}
+                    </Button>
+                    {headings?.output?.headings?.map?.(
+                      (heading: Heading, index: number) => (
+                        <Input
+                          key={index}
+                          name="heading"
+                          label={heading.tag}
+                          initialValue={heading.text}
+                        />
+                      )
+                    )}
+                  </div>
+                )}
+              </div>
+            </form>
+          </>
+        )}
+      </div>
+      <div className="flex flex-col items-start gap-8">
+        <div className="space-y-3">
+          <ProgressItem
+            state={!aiHeadings?.tasks?.length ? "progress" : "completed"}
+            name="Starting up"
+          />
+          {aiHeadings?.tasks?.map((task) => (
+            <ProgressItem
+              key={task.id}
+              state={
+                task.status === "COMPLETED"
+                  ? "completed"
+                  : task.status === "ERRORED"
+                  ? "failed"
+                  : "progress"
+              }
+              name={task.displayKey || task.name || ""}
+              icon={task.icon}
+            />
+          ))}
+          {aiHeadings?.output && aiHeadings.status === "SUCCESS" && (
             <ProgressItem
               state="completed"
-              name={data.output.message.content}
+              name={aiHeadings.output.message.content}
             />
+          )}
+        </div>
+        <h2>AI headings:</h2>
+        <div className="grow w-full space-y-2">
+          {aiHeadings?.output && (
+            <div className="space-y-4 text-center">
+              {aiHeadings?.output.message.content
+                .split("\n")
+                .map((heading: string, index: number) => (
+                  <Input key={index} initialValue={heading} />
+                ))}
+            </div>
           )}
         </div>
       </div>
