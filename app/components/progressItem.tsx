@@ -11,14 +11,14 @@ type ProgressItemProps = {
 
 function ProgressItem({ icon, state, name }: ProgressItemProps) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2.5">
       <div className="shrink-0">
         {state === "progress" ? (
-          <Spinner className="w-6 h-6" />
+          <Spinner className="w-5 h-5" />
         ) : state === "completed" ? (
-          <CheckCircledIcon className="w-6 h-6 text-emerald-600" />
+          <CheckCircledIcon className="w-5 h-5 text-emerald-600" />
         ) : (
-          <CrossCircledIcon className="w-6 h-6 text-red-600" />
+          <CrossCircledIcon className="w-5 h-5 text-red-600" />
         )}
       </div>
       <div className="flex gap-2 items-center">
