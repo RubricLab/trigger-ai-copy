@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Input from "./Input";
 import { validateUrl } from "@/utils";
-import { readHeadings, generateHeadings } from "../app/actions";
+import { readHeadings, generateHeadings } from "../actions";
 import { Button } from "./Button";
 import { useEventRunDetails } from "@trigger.dev/react";
 import { Heading } from "@/types";
