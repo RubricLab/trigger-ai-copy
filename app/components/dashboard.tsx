@@ -92,28 +92,22 @@ function Dashboard() {
             />
           )}
         </div>
-        {headings && (
+        {headings?.output && (
           <>
             <h2>Headings:</h2>
             <form action={onSubmit} className="space-y-4 w-full">
-              <div className="grow w-full space-y-2">
-                {headings?.output && (
-                  <div className="space-y-4">
-                    <Button disabled={aiHeadingsLoading}>
-                      {aiHeadingsLoading
-                        ? "Loading..."
-                        : "Generate new headings"}
-                    </Button>
-                    {headings?.output?.headings?.map?.(
-                      (heading: Heading, index: number) => (
-                        <Input
-                          key={index}
-                          name="heading"
-                          initialValue={heading.text}
-                        />
-                      )
-                    )}
-                  </div>
+              <div className="grow w-full space-y-4">
+                <Button disabled={aiHeadingsLoading}>
+                  {aiHeadingsLoading ? "Loading..." : "Generate new headings"}
+                </Button>
+                {headings?.output?.headings?.map?.(
+                  (heading: Heading, index: number) => (
+                    <Input
+                      key={index}
+                      name="heading"
+                      initialValue={heading.text}
+                    />
+                  )
                 )}
               </div>
             </form>
