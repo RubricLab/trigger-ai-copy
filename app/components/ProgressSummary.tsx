@@ -1,5 +1,6 @@
 import React from "react";
 import ProgressItem from "./ProgressItem";
+import { TaskStatus } from "@/types";
 
 type Props = {
   run?: {
@@ -14,17 +15,7 @@ type Props = {
       message: string;
       [key: string]: any;
     };
-    status:
-      | "PENDING"
-      | "CANCELED"
-      | "SUCCESS"
-      | "QUEUED"
-      | "WAITING_ON_CONNECTIONS"
-      | "PREPROCESSING"
-      | "STARTED"
-      | "FAILURE"
-      | "TIMED_OUT"
-      | "ABORTED";
+    status: TaskStatus;
   };
 };
 
