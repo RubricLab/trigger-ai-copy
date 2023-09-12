@@ -3,6 +3,8 @@ import { client } from "@/trigger";
 import { z } from "zod";
 import { load } from "cheerio";
 
+const MAX_HEADING_LENGTH = 200;
+
 /**
  * Trigger.dev job to collect headings from a server-side rendered website
  */
@@ -31,11 +33,19 @@ client.defineJob({
       io.logger.info("Headings collected");
 
       const headings: { tag: string; text: string }[] = [];
+
       headingElements.each((_, element) => {
-        headings.push({
-          tag: element.tagName.trim().toUpperCase(),
-          text: queryFunction(element).text(),
-        });
+        const elementText = queryFunction(element)?.text?.();
+
+        if (typeof elementText === "string" && elementText.trim() !== "") {
+          headings.push({
+            tag: element.tagName.trim().toUpperCase(),
+            text: elementText
+              .trim()
+              .replace(/\s+/g, " ")
+              .substring(0, MAX_HEADING_LENGTH),
+          });
+        }
       });
 
       return {
