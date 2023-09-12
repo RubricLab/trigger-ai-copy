@@ -6,8 +6,8 @@ import { validateUrl } from "@/utils";
 import { readHeadings, generateHeadings } from "../actions";
 import { Button } from "./Button";
 import { useEventRunDetails } from "@trigger.dev/react";
-import ProgressItem from "./ProgressItem";
 import { Heading } from "@/types";
+import ProgressSummary from "./ProgressSummary";
 
 function Dashboard() {
   const [pageUrl, setPageUrl] = useState("");
@@ -33,15 +33,15 @@ function Dashboard() {
   }, [validUrl]);
 
   const {
-    data: headings,
+    data: headingsRun,
     isLoading: headingsLoading,
     error: headingsError,
   } = useEventRunDetails(headingsRunId);
 
   const {
-    data: aiHeadings,
-    isLoading: aiHeadingsLoading,
-    error: aiHeadingsError,
+    data: generateRun,
+    isLoading: generateRunLoading,
+    error: generateRunError,
   } = useEventRunDetails(generateRunId);
 
   // TODO: componentize two columns (lots in common)
@@ -60,47 +60,16 @@ function Dashboard() {
         <Button disabled={!validUrl || headingsLoading} onClick={fetchHeadings}>
           Get headings
         </Button>
-        <div className="space-y-3">
-          <ProgressItem
-            name="Starting up"
-            state={
-              headingsError
-                ? "failed"
-                : headings?.tasks?.length
-                ? "completed"
-                : "progress"
-            }
-          />
-          {headings?.tasks?.map((task) => (
-            <ProgressItem
-              key={task.id}
-              state={
-                task.status === "COMPLETED"
-                  ? "completed"
-                  : task.status === "ERRORED"
-                  ? "failed"
-                  : "progress"
-              }
-              name={task.displayKey || task.name || ""}
-              icon={task.icon}
-            />
-          ))}
-          {headings?.output && (
-            <ProgressItem
-              state={headings.status === "SUCCESS" ? "completed" : "failed"}
-              name={headings.output.message}
-            />
-          )}
-        </div>
-        {headings?.output && (
+        <ProgressSummary run={headingsRun} />
+        {headingsRun?.output && (
           <>
             <h2>Headings:</h2>
             <form action={onSubmit} className="space-y-4 w-full">
               <div className="grow w-full space-y-4">
-                <Button disabled={aiHeadingsLoading}>
-                  {aiHeadingsLoading ? "Loading..." : "Generate new headings"}
+                <Button disabled={generateRunLoading}>
+                  {generateRunLoading ? "Loading..." : "Generate new headings"}
                 </Button>
-                {headings?.output?.headings?.map?.(
+                {headingsRun?.output?.headings?.map?.(
                   (heading: Heading, index: number) => (
                     <Input
                       key={index}
@@ -115,33 +84,11 @@ function Dashboard() {
         )}
       </div>
       <div className="flex flex-col items-start gap-8">
-        <div className="space-y-3">
-          <ProgressItem
-            state={!aiHeadings?.tasks?.length ? "progress" : "completed"}
-            name="Starting up"
-          />
-          {aiHeadings?.tasks?.map((task) => (
-            <ProgressItem
-              key={task.id}
-              state={
-                task.status === "COMPLETED"
-                  ? "completed"
-                  : task.status === "ERRORED"
-                  ? "failed"
-                  : "progress"
-              }
-              name={task.displayKey || task.name || ""}
-              icon={task.icon}
-            />
-          ))}
-          {aiHeadings?.output && aiHeadings.status === "SUCCESS" && (
-            <ProgressItem state="completed" name={aiHeadings.output.message} />
-          )}
-        </div>
-        {aiHeadings?.output && (
+        <ProgressSummary run={generateRun} />
+        {generateRun?.output && (
           <div className="grow w-full space-y-4">
             <h2>AI headings:</h2>
-            {aiHeadings?.output?.headings
+            {generateRun?.output?.headings
               ?.split("\n")
               .map((heading: string, index: number) => (
                 <Input disabled={true} key={index} initialValue={heading} />
