@@ -52,16 +52,17 @@ function Dashboard() {
 
   return (
     <form action={onSubmit} className="w-full grow p-12 space-y-12">
-      <div className="grid grid-cols-2 space-x-8 h-56">
-        <div className="space-y-4">
-          <Input
-            label="Your landing page:"
-            className={validUrl ? "!ring-green-400/60" : ""}
-            placeholder="trigger.dev"
-            onChange={setPageUrl}
-            clearable
-          />
-
+      <div className="flex justify-center">
+        <Input
+          label="Your landing page:"
+          className={validUrl ? "!ring-green-400/60" : ""}
+          placeholder="trigger.dev"
+          onChange={setPageUrl}
+          clearable
+        />
+      </div>
+      <div className="grid grid-cols-2 space-x-12">
+        <div className="space-y-4 flex flex-col items-end">
           <Button disabled={!validUrl || loading} onClick={fetchHeadings}>
             Get headings
           </Button>
@@ -74,8 +75,8 @@ function Dashboard() {
           <ProgressSummary run={generateRun} />
         </div>
       </div>
-      <div className="grid grid-cols-2 space-x-8 w-full grow">
-        <div className="space-y-4">
+      <div className="grid grid-cols-2 space-x-12 w-full grow">
+        <div className="space-y-4 flex flex-col items-end">
           <h2>Headings:</h2>
           {headingsRun?.output?.headings?.map?.(
             (heading: Heading, index: number) => (

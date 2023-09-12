@@ -22,7 +22,7 @@ function ProgressItem({ icon, state, name }: ProgressItemProps) {
         )}
       </div>
       <div className="flex gap-2 items-center">
-        <h4 className="text-base">{name}</h4>
+        <h4 className="text-sm text-dimmed">{name}</h4>
         {icon && icon !== "log" && (
           <CompanyIcon name={icon} className="w-5 h-5 invert" />
         )}
