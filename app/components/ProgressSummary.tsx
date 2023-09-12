@@ -33,12 +33,10 @@ const ProgressSummary = ({ run }: Props) => {
 
   return (
     <div className="space-y-3">
-      {run.tasks && (
-        <ProgressItem
-          state={!run.tasks?.length ? "progress" : "completed"}
-          name="Starting up"
-        />
-      )}
+      <ProgressItem
+        state={!run.tasks?.length ? "progress" : "completed"}
+        name="Starting up"
+      />
       {run.tasks
         .filter((task) => task.name !== "log")
         .map((task) => (
