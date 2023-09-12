@@ -36,7 +36,7 @@ function Input({
   }, [value]);
 
   return (
-    <div className="space-y-1 w-full max-w-md">
+    <div className="space-y-1 w-full max-w-md group">
       {disabled}
       {label && (
         <label className="font-medium" htmlFor={inputId}>
@@ -53,14 +53,15 @@ function Input({
           disabled={disabled}
           required={required}
           placeholder={placeholder}
-          className={`${className} p-2 pr-8 rounded-md border border-midnight-700 bg-midnight-850 enabled:hover:bg-midnight-800 focus:outline-none focus:ring-4 ring-indigo-500/80 focus:border-opacity-0 w-full transition-colors disabled:opacity-70`}
+          className={`${className} p-2 pr-8 text-ellipsis rounded-md border border-midnight-800 bg-midnight-850 enabled:hover:bg-midnight-800 focus:outline-none focus:ring-4 ring-indigo-500/60 focus:border-opacity-0 w-full transition-colors disabled:opacity-70`}
         />
         {clearable && (
           <button
-            className={`p-2 absolute right-0 inset-y-0 hover:text-red-400 transition-opacity focus:outline-none ${
-              value ? "opacity-100" : "opacity-0"
+            className={`p-2 absolute right-0 inset-y-0 hover:text-red-400 transition-opacity opacity-0 focus:outline-none ${
+              value ? "group-hover:opacity-100" : ""
             }`}
             onClick={() => setValue("")}
+            type="button"
           >
             <Cross2Icon className="w-5 h-5" />
           </button>
