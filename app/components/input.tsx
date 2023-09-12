@@ -8,6 +8,7 @@ type Props = {
   name?: string;
   type?: string;
   required?: boolean;
+  disabled?: boolean;
   placeholder?: string;
   initialValue?: string;
   clearable?: boolean;
@@ -20,6 +21,7 @@ function Input({
   name,
   type = "text",
   required = false,
+  disabled = false,
   placeholder,
   initialValue,
   clearable = false,
@@ -35,6 +37,7 @@ function Input({
 
   return (
     <div className="space-y-1 w-full max-w-md">
+      {disabled}
       {label && (
         <label className="font-medium" htmlFor={inputId}>
           {label}
@@ -47,9 +50,10 @@ function Input({
           name={name}
           onChange={(e) => setValue(e.target.value)}
           type={type}
+          disabled={disabled}
           required={required}
           placeholder={placeholder}
-          className={`${className} p-2 pr-8 rounded-md border border-midnight-700 bg-midnight-850 hover:bg-midnight-800 focus:outline-none focus:ring-4 ring-indigo-500/80 focus:border-opacity-0 w-full transition-colors`}
+          className={`${className} p-2 pr-8 rounded-md border border-midnight-700 bg-midnight-850 enabled:hover:bg-midnight-800 focus:outline-none focus:ring-4 ring-indigo-500/80 focus:border-opacity-0 w-full transition-colors disabled:opacity-70`}
         />
         {clearable && (
           <button

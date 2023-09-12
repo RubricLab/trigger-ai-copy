@@ -138,18 +138,16 @@ function Dashboard() {
             <ProgressItem state="completed" name={aiHeadings.output.message} />
           )}
         </div>
-        <h2>AI headings:</h2>
-        <div className="grow w-full space-y-2">
-          {aiHeadings?.output && (
-            <div className="space-y-4 text-center">
-              {aiHeadings?.output?.headings
-                ?.split("\n")
-                .map((heading: string, index: number) => (
-                  <Input key={index} initialValue={heading} />
-                ))}
-            </div>
-          )}
-        </div>
+        {aiHeadings?.output && (
+          <div className="grow w-full space-y-4">
+            <h2>AI headings:</h2>
+            {aiHeadings?.output?.headings
+              ?.split("\n")
+              .map((heading: string, index: number) => (
+                <Input disabled={true} key={index} initialValue={heading} />
+              ))}
+          </div>
+        )}
       </div>
     </div>
   );
