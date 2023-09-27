@@ -9,17 +9,18 @@ export interface Env {
  */
 const worker = {
 	async fetch(request: Request, env: Env): Promise<Response> {
-		const { searchParams } = new URL(request.url);
-		let url = searchParams.get("url");
+		if (request.method !== "POST") {
+			return new Response("Please use the POST method", { status: 405 });
+		}
 
-		if (!url) {
-			return new Response(
-				"Please add the URL parameter: ?url=https://example.com"
-			);
+		const body = (await request.json()) as any;
+
+		if (!body?.url) {
+			return new Response("Please include a URL to visit");
 		}
 
 		// Normalize URL
-		url = new URL(url).toString();
+		const url = new URL(body.url).toString();
 
 		try {
 			const browser = await puppeteer.launch(env.BROWSER);
@@ -31,8 +32,6 @@ const worker = {
 			const data = await page.content();
 			const querySelector = load(data);
 			const headingElements = querySelector("h1, h2, h3");
-
-			console.log("Headings collected");
 
 			const headings: { tag: string; text: string }[] = [];
 			headingElements.each((_, element) => {
