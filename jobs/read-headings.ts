@@ -5,6 +5,7 @@ import { load } from "cheerio";
 
 const MAX_HEADING_LENGTH = 200;
 const MAX_HEADING_COUNT = 50;
+const WORKER_URL = "https://puppeteer.tedspare.workers.dev";
 
 /**
  * Trigger.dev job to collect headings from a server-side rendered website
@@ -23,7 +24,18 @@ client.defineJob({
     const { url } = payload;
 
     try {
-      // Fetch the page by URL
+      const res = await fetch(WORKER_URL, {
+        method: "POST",
+        body: JSON.stringify({ url }),
+      });
+
+      const screenshot = await res.text();
+
+      return {
+        screenshot,
+      };
+
+      // // Fetch the page by URL
       const page = await fetch(url);
 
       io.logger.info("Page fetched");

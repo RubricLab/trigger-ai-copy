@@ -7,18 +7,15 @@ import { callTrigger } from "../actions";
 import { Button } from "./Button";
 import { useEventRunDetails } from "@trigger.dev/react";
 import Image from "next/image";
+import ProgressSummary from "./ProgressSummary";
 
 function Dashboard() {
   const [pageUrl, setPageUrl] = useState("");
   const [eventId, setEventId] = useState("");
-  const [loading, setLoading] = useState(false);
-
   const validUrl = useMemo(() => validateUrl(pageUrl), [pageUrl]);
 
   const submit = async () => {
     if (!validUrl) return;
-
-    setLoading(true);
 
     const res = await callTrigger(validUrl);
 
@@ -37,24 +34,24 @@ function Dashboard() {
           onChange={setPageUrl}
           clearable
         />
-        <Button disabled={!validUrl || loading} type="submit">
+        <Button disabled={!validUrl} type="submit">
           Remix my headings
         </Button>
-        {/* <ProgressSummary run={headingsRun} /> */}
-      </div>
-      <div>
-        JSON.stringify(data):
-        {JSON.stringify(data)}
+        <ProgressSummary run={data} />
       </div>
       <div className="grid grid-cols-2 space-x-12 w-full grow">
         <div className="space-y-4 flex flex-col items-end">
           <h2>Current site:</h2>
-          <Image
-            src="https://picsum.photos/seed/1695841058849/500/600"
-            height={600}
-            width={500}
-            alt="Current website screenshot"
-          />
+          {data?.output?.screenshot ? (
+            <Image
+              src={data?.output?.screenshot}
+              height={600}
+              width={500}
+              alt="Current website screenshot"
+            />
+          ) : (
+            <div className="w-[500px] h-full bg-blue-900 animate-pulse rounded-md"></div>
+          )}
         </div>
         <div className="space-y-4">
           <h2>Remixed:</h2>

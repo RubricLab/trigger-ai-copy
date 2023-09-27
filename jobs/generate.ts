@@ -3,7 +3,7 @@ import { client, openai } from "@/trigger";
 import { z } from "zod";
 
 /**
- * Trigger.dev job to generate copy with OpenAI's gpt-3.5-turbo model
+ * Trigger.dev job to generate copy with OpenAI's GPT
  */
 client.defineJob({
   id: "generate",

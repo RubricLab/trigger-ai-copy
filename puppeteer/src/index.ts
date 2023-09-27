@@ -1,8 +1,12 @@
 import puppeteer from "@cloudflare/puppeteer";
 import { load } from "cheerio";
+
 export interface Env {
 	BROWSER: Fetcher;
+	BUCKET: R2Bucket;
 }
+
+const BUCKET_URL = "https://pub-04cd4de7299e4dbf942ccff55ae279d1.r2.dev";
 
 /**
  * Cloudflare Worker to collect headings from a client-rendered website
@@ -19,8 +23,20 @@ const worker = {
 			return new Response("Please include a URL to visit");
 		}
 
-		// Normalize URL
 		const url = new URL(body.url).toString();
+
+		const filename = `${url.replaceAll("/", "")}.png`;
+
+		// Return cached screenshot if available
+		const img = await env.BUCKET.get(filename);
+
+		if (img) {
+			return new Response(`${BUCKET_URL}/${filename}`, {
+				headers: {
+					"content-type": "text/plain",
+				},
+			});
+		}
 
 		try {
 			const browser = await puppeteer.launch(env.BROWSER);
@@ -41,11 +57,15 @@ const worker = {
 				});
 			});
 
+			const screenshotBuffer = await page.screenshot();
+
 			await browser.close();
 
-			return new Response(JSON.stringify(headings), {
+			await env.BUCKET.put(filename, screenshotBuffer);
+
+			return new Response(`${BUCKET_URL}/${filename}`, {
 				headers: {
-					"content-type": "application/json",
+					"content-type": "text/plain",
 				},
 			});
 		} catch (error) {
