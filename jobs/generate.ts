@@ -1,6 +1,7 @@
 import { eventTrigger } from "@trigger.dev/sdk";
 import { client, openai } from "@/trigger";
 import { z } from "zod";
+import { Heading } from "@/types";
 
 /**
  * Trigger.dev job to generate copy with OpenAI's GPT
@@ -12,7 +13,12 @@ client.defineJob({
   trigger: eventTrigger({
     name: "generate.event",
     schema: z.object({
-      headings: z.array(z.string()),
+      headings: z.array(
+        z.object({
+          id: z.number(),
+          text: z.string(),
+        })
+      ),
     }) as any,
   }),
   integrations: {
@@ -20,14 +26,14 @@ client.defineJob({
   },
   run: async (payload, io, _) => {
     const prefix = `
-    Re-write the following landing page heading(s) to be more impactful.
+    Re-write each following landing page heading to be more impactful.
     Limit prose.
-    Separate headings with a newline.
+    Retain the structure of the data.
     `;
     const { headings } = payload;
-    const prompt = `${prefix}\n\n${headings.join("\n")}`;
-
-    io.logger.info("Generating text...");
+    const prompt = `${prefix}\n\n${headings
+      .map((h: Heading) => `${h.id}: ${h.text}`)
+      .join("\n")}`;
 
     const response = await io.openai.backgroundCreateChatCompletion(
       "openai-completions-api",
@@ -41,8 +47,6 @@ client.defineJob({
         ],
       }
     );
-
-    io.logger.info("Generated new headings!");
 
     if (!response?.choices?.length) {
       throw new Error("OpenAI failed to return a response");

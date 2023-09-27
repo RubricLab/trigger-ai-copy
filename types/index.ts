@@ -1,5 +1,5 @@
 export type Heading = {
-  tag: string;
+  id: number;
   text: string;
 };
 

@@ -2,6 +2,7 @@ import { eventTrigger } from "@trigger.dev/sdk";
 import { client } from "@/trigger";
 import { z } from "zod";
 import { load } from "cheerio";
+import { Heading } from "@/types";
 
 const MAX_HEADING_LENGTH = 200;
 const MAX_HEADING_COUNT = 50;
@@ -31,31 +32,32 @@ client.defineJob({
 
       const screenshot = await res.text();
 
-      return {
-        screenshot,
-      };
+      await io.createStatus("screenshot", {
+        label: "Initial screenshot",
+        state: "success",
+        data: {
+          url: screenshot,
+        },
+      });
 
-      // // Fetch the page by URL
+      // Fetch the page by URL
       const page = await fetch(url);
-
-      io.logger.info("Page fetched");
 
       // Query the page for heading elements
       const data = await page.text();
       const queryFunction = load(data);
       const headingElements = queryFunction("h1, h2, h3");
 
-      io.logger.info("Headings collected");
-
-      const headings: { tag: string; text: string }[] = [];
+      const headings: Heading[] = [];
 
       headingElements.each((_, element) => {
         const elementText = queryFunction(element)?.text?.();
+        const elementIndex = queryFunction(element).index();
 
         if (typeof elementText === "string" && elementText.trim() !== "") {
           headings.push({
             // Clean up heading text
-            tag: element.tagName.trim().toUpperCase(),
+            id: elementIndex,
             text: elementText
               .trim()
               .replace(/\s+/g, " ")
@@ -67,10 +69,27 @@ client.defineJob({
       // Limit the number of headings
       headings.splice(MAX_HEADING_COUNT);
 
-      return {
-        message: "Fetched headings!",
-        headings,
-      };
+      await io.createStatus("headings", {
+        label: "Fetch headings",
+        state: "success",
+      });
+
+      const newHeadings = await client.sendEvent({
+        name: "generate.event",
+        payload: {
+          headings,
+        },
+      });
+
+      await io.createStatus("new-headings", {
+        label: "Generate new headings",
+        state: "success",
+        data: {
+          headings: newHeadings,
+        },
+      });
+
+      return;
     } catch (error) {
       io.logger.error("Failed to read page", { error });
 

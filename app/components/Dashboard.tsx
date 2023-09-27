@@ -5,9 +5,8 @@ import Input from "./Input";
 import { validateUrl } from "@/utils";
 import { callTrigger } from "../actions";
 import { Button } from "./Button";
-import { useEventRunDetails } from "@trigger.dev/react";
+import { useEventRunStatuses } from "@trigger.dev/react";
 import Image from "next/image";
-import ProgressSummary from "./ProgressSummary";
 
 function Dashboard() {
   const [pageUrl, setPageUrl] = useState("");
@@ -22,7 +21,7 @@ function Dashboard() {
     setEventId(res.id);
   };
 
-  const { data } = useEventRunDetails(eventId);
+  const { statuses } = useEventRunStatuses(eventId);
 
   return (
     <form action={submit} className="w-full grow p-12 pt-32 space-y-12">
@@ -37,14 +36,23 @@ function Dashboard() {
         <Button disabled={!validUrl} type="submit">
           Remix my headings
         </Button>
-        <ProgressSummary run={data} />
+      </div>
+      <div className="w-full flex flex-col items-center justify-center">
+        {statuses?.map((status) => (
+          <p key={status.key}>
+            ✅ {status.label}: {status.state}
+          </p>
+        ))}
       </div>
       <div className="grid grid-cols-2 space-x-12 w-full grow">
         <div className="space-y-4 flex flex-col items-end">
           <h2>Current site:</h2>
-          {data?.output?.screenshot ? (
+          {statuses?.find((s) => s.key === "screenshot") ? (
             <Image
-              src={data?.output?.screenshot}
+              src={
+                statuses?.find((s) => s.key === "screenshot")?.data
+                  ?.url as string
+              }
               height={600}
               width={500}
               alt="Current website screenshot"
@@ -55,6 +63,7 @@ function Dashboard() {
         </div>
         <div className="space-y-4">
           <h2>Remixed:</h2>
+
           <Image
             src="https://picsum.photos/seed/1695841054849/500/600"
             height={600}
