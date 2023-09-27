@@ -1,58 +1,35 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import Input from "./Input";
 import { validateUrl } from "@/utils";
-import { readHeadings, generateHeadings } from "../actions";
+import { callTrigger } from "../actions";
 import { Button } from "./Button";
 import { useEventRunDetails } from "@trigger.dev/react";
-import { Heading } from "@/types";
-import ProgressSummary from "./ProgressSummary";
+import Image from "next/image";
 
 function Dashboard() {
   const [pageUrl, setPageUrl] = useState("");
-  const [generateRunId, setGenerateRunId] = useState("");
-  const [headingsRunId, setHeadingsRunId] = useState("");
+  const [eventId, setEventId] = useState("");
   const [loading, setLoading] = useState(false);
 
   const validUrl = useMemo(() => validateUrl(pageUrl), [pageUrl]);
 
-  const onSubmit = async (formData: FormData) => {
+  const submit = async () => {
+    if (!validUrl) return;
+
     setLoading(true);
-    const headings = formData.getAll("heading").map((h) => h.toString());
 
-    const res = await generateHeadings(headings);
+    const res = await callTrigger(validUrl);
 
-    setGenerateRunId(res.id);
+    setEventId(res.id);
   };
 
-  const fetchHeadings = useCallback(async () => {
-    setLoading(true);
-    if (validUrl) {
-      const res = await readHeadings(validUrl);
-
-      setHeadingsRunId(res.id);
-    }
-  }, [validUrl]);
-
-  const { data: headingsRun } = useEventRunDetails(headingsRunId);
-  const { data: generateRun } = useEventRunDetails(generateRunId);
-
-  useEffect(() => {
-    if (headingsRun?.status == "SUCCESS") {
-      setLoading(false);
-    }
-  }, [headingsRun]);
-
-  useEffect(() => {
-    if (generateRun?.status == "SUCCESS") {
-      setLoading(false);
-    }
-  }, [generateRun]);
+  const { data } = useEventRunDetails(eventId);
 
   return (
-    <form action={onSubmit} className="w-full grow p-12 space-y-12">
-      <div className="flex justify-center">
+    <form action={submit} className="w-full grow p-12 pt-32 space-y-12">
+      <div className="flex items-end justify-center gap-4">
         <Input
           label="Your landing page:"
           className={validUrl ? "!ring-green-400/60" : ""}
@@ -60,42 +37,33 @@ function Dashboard() {
           onChange={setPageUrl}
           clearable
         />
+        <Button disabled={!validUrl || loading} type="submit">
+          Remix my headings
+        </Button>
+        {/* <ProgressSummary run={headingsRun} /> */}
       </div>
-      <div className="grid grid-cols-2 space-x-12">
-        <div className="space-y-4 flex flex-col items-end">
-          <Button disabled={!validUrl || loading} onClick={fetchHeadings}>
-            Get headings
-          </Button>
-          <ProgressSummary run={headingsRun} />
-        </div>
-        <div className="space-y-4">
-          <Button disabled={!headingsRun || loading} type="submit">
-            Generate new headings
-          </Button>
-          <ProgressSummary run={generateRun} />
-        </div>
+      <div>
+        JSON.stringify(data):
+        {JSON.stringify(data)}
       </div>
       <div className="grid grid-cols-2 space-x-12 w-full grow">
         <div className="space-y-4 flex flex-col items-end">
-          <h2>Headings:</h2>
-          {headingsRun?.output?.headings?.map?.(
-            (heading: Heading, index: number) => (
-              <Input
-                key={index}
-                name="heading"
-                initialValue={heading.text}
-                clearable
-              />
-            )
-          )}
+          <h2>Current site:</h2>
+          <Image
+            src="https://picsum.photos/seed/1695841058849/500/600"
+            height={600}
+            width={500}
+            alt="Current website screenshot"
+          />
         </div>
         <div className="space-y-4">
-          <h2>AI headings:</h2>
-          {generateRun?.output?.headings
-            ?.split("\n")
-            .map((heading: string, index: number) => (
-              <Input key={index} initialValue={heading} disabled />
-            ))}
+          <h2>Remixed:</h2>
+          <Image
+            src="https://picsum.photos/seed/1695841054849/500/600"
+            height={600}
+            width={500}
+            alt="New website"
+          />
         </div>
       </div>
     </form>
