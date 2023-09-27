@@ -7,13 +7,15 @@ export interface Env {
 /**
  * Cloudflare Worker to collect headings from a client-rendered website
  */
-export default {
+const worker = {
 	async fetch(request: Request, env: Env): Promise<Response> {
 		const { searchParams } = new URL(request.url);
 		let url = searchParams.get("url");
 
 		if (!url) {
-			return new Response("Please add an ?url=https://example.com/ parameter");
+			return new Response(
+				"Please add the URL parameter: ?url=https://example.com"
+			);
 		}
 
 		// Normalize URL
@@ -53,3 +55,5 @@ export default {
 		}
 	},
 };
+
+export default worker;
