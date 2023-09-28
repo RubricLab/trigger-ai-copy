@@ -1,4 +1,4 @@
 // import all your job files here
 
 export * from "./generate";
-export * from "./read-headings";
+export * from "./remix";

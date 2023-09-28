@@ -18,20 +18,20 @@ const worker = {
 		}
 
 		const body = (await request.json()) as any;
+		const { url: pageUrl, newHeadings } = body;
 
-		if (!body?.url) {
+		if (!pageUrl) {
 			return new Response("Please include a URL to visit");
 		}
 
-		const url = new URL(body.url).toString();
+		const url = new URL(pageUrl).toString();
 
-		const filename = `${url.replaceAll("/", "")}.png`;
+		const filename = url.replaceAll("/", "");
 
 		// Return cached screenshot if available
-		const img = await env.BUCKET.get(filename);
-
-		if (img) {
-			return new Response(`${BUCKET_URL}/${filename}`, {
+		const img = await env.BUCKET.get(`${filename}.png`);
+		if (img && !newHeadings) {
+			return new Response(`${BUCKET_URL}/${filename}.png`, {
 				headers: {
 					"content-type": "text/plain",
 				},
@@ -44,30 +44,37 @@ const worker = {
 			const page = await browser.newPage();
 			await page.goto(url);
 
-			// Select all headings in page
-			const data = await page.content();
-			const querySelector = load(data);
-			const headingElements = querySelector("h1, h2, h3");
+			if (newHeadings) {
+				for (const element of newHeadings) {
+					const heading = await page.$$("h1, h2, h3");
 
-			const headings: { tag: string; text: string }[] = [];
-			headingElements.each((_, element) => {
-				headings.push({
-					tag: element.tagName,
-					text: querySelector(element).text(),
-				});
-			});
+					if (element.id < heading.length) {
+						await page.evaluate(
+							(el, value) => (el.textContent = value),
+							heading[element.id],
+							element.text
+						);
+					}
+				}
+			}
 
 			const screenshotBuffer = await page.screenshot();
 
+			await env.BUCKET.put(
+				`${filename}${newHeadings ? "-remixed" : ""}.png`,
+				screenshotBuffer
+			);
+
 			await browser.close();
 
-			await env.BUCKET.put(filename, screenshotBuffer);
-
-			return new Response(`${BUCKET_URL}/${filename}`, {
-				headers: {
-					"content-type": "text/plain",
-				},
-			});
+			return new Response(
+				`${BUCKET_URL}/${filename}${newHeadings ? "-remixed" : ""}.png`,
+				{
+					headers: {
+						"content-type": "text/plain",
+					},
+				}
+			);
 		} catch (error) {
 			console.error("Failed to read page", error);
 			return new Response("Failed to read page", { status: 500 });
