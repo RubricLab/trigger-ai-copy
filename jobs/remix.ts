@@ -82,7 +82,7 @@ client.defineJob({
       await io.logger.info("Prompt", { prompt });
 
       // Call the OpenAI API to generate new headings
-      const response = await io.openai.backgroundCreateChatCompletion(
+      const response = await io.openai.createChatCompletion(
         "openai-completions-api",
         {
           model: "gpt-3.5-turbo",
