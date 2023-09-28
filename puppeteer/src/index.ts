@@ -1,5 +1,4 @@
 import puppeteer from "@cloudflare/puppeteer";
-import { load } from "cheerio";
 
 export interface Env {
 	BROWSER: Fetcher;
@@ -58,7 +57,9 @@ const worker = {
 				}
 			}
 
-			const screenshotBuffer = await page.screenshot();
+			const screenshotBuffer = await page.screenshot({
+				fromSurface: false,
+			});
 
 			await env.BUCKET.put(
 				`${filename}${newHeadings ? "-remixed" : ""}.png`,

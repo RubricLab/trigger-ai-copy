@@ -75,6 +75,7 @@ client.defineJob({
       const prefix = `
       Re-write each following landing page heading to be more impactful.
       Limit prose.
+      Retain the rough length of headings.
       Retain the order of the data.
       `;
       const prompt = `${prefix.trim()}\n\n${headings.join("\n")}`;
@@ -123,7 +124,7 @@ client.defineJob({
       });
       const newScreenshot = await newScreenshotRes.text();
 
-      await io.createStatus("screenshot2", {
+      await io.createStatus("screenshot-modified", {
         label: "Final screenshot",
         state: "success",
         data: {
