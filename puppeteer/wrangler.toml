@@ -9,3 +9,9 @@ browser = { binding = "BROWSER" }
 binding = 'BUCKET'
 bucket_name = 'screenshots'
 preview_bucket_name = 'test-bucket'
+
+[vars]
+BUCKET_URL = "https://pub-04cd4de7299e4dbf942ccff55ae279d1.r2.dev"
+
+[env.production.vars]
+BUCKET_URL = "https://pub-e8437b1e2c4143f08e6c2d73aa7e26de.r2.dev"

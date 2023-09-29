@@ -3,9 +3,12 @@ import puppeteer from "@cloudflare/puppeteer";
 export interface Env {
 	BROWSER: Fetcher;
 	BUCKET: R2Bucket;
+	BUCKET_URL: string;
 }
 
-const BUCKET_URL = "https://pub-04cd4de7299e4dbf942ccff55ae279d1.r2.dev";
+const wait = (ms: number): Promise<void> => {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+};
 
 /**
  * Cloudflare Worker to collect headings from a client-rendered website
@@ -24,24 +27,20 @@ const worker = {
 		}
 
 		const url = new URL(pageUrl).toString();
-
-		const filename = url.replaceAll("/", "");
-
-		// Return cached screenshot if available
-		const img = await env.BUCKET.get(`${filename}.png`);
-		if (img && !newHeadings) {
-			return new Response(`${BUCKET_URL}/${filename}.png`, {
-				headers: {
-					"content-type": "text/plain",
-				},
-			});
-		}
+		const filename = url.replace(/https:\/\//g, "").replace(/\.|\//g, "-");
 
 		try {
 			const browser = await puppeteer.launch(env.BROWSER);
 
 			const page = await browser.newPage();
-			await page.goto(url);
+			await page.goto(url, { waitUntil: "networkidle0" });
+			await page.setViewport({
+				width: 1280,
+				height: 960,
+				deviceScaleFactor: 1,
+			});
+
+			await wait(3000);
 
 			if (newHeadings) {
 				for (const element of newHeadings) {
@@ -58,7 +57,7 @@ const worker = {
 			}
 
 			const screenshotBuffer = await page.screenshot({
-				fromSurface: false,
+				fullPage: true,
 			});
 
 			await env.BUCKET.put(
@@ -69,7 +68,7 @@ const worker = {
 			await browser.close();
 
 			return new Response(
-				`${BUCKET_URL}/${filename}${newHeadings ? "-remixed" : ""}.png`,
+				`${env.BUCKET_URL}/${filename}${newHeadings ? "-remixed" : ""}.png`,
 				{
 					headers: {
 						"content-type": "text/plain",

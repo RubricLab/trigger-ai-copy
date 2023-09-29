@@ -5,7 +5,12 @@ import { load } from "cheerio";
 
 const MAX_HEADING_LENGTH = 200;
 const MAX_HEADING_COUNT = 50;
-const WORKER_URL = "https://puppeteer.tedspare.workers.dev";
+
+// Make sure to run `wrangler dev --remote` to test locally
+const WORKER_URL =
+  process.env.NODE_ENV === "development"
+    ? "http://127.0.0.1:8787"
+    : "https://puppeteer.tedspare.workers.dev";
 
 /**
  * Trigger.dev job to collect headings from a server-side rendered website
@@ -27,18 +32,29 @@ client.defineJob({
     const { url } = payload;
 
     try {
+      const initialScreenshotStatus = await io.createStatus("screenshot", {
+        label: "Initial screenshot",
+        state: "loading",
+      });
+
       const screenshotRes = await fetch(WORKER_URL, {
         method: "POST",
         body: JSON.stringify({ url }),
       });
+
       const screenshot = await screenshotRes.text();
 
-      await io.createStatus("screenshot", {
+      await initialScreenshotStatus.update("screenshotted", {
         label: "Initial screenshot",
         state: "success",
         data: {
           url: screenshot,
         },
+      });
+
+      const fetchHeadingsStatus = await io.createStatus("headings", {
+        label: "Fetch headings",
+        state: "loading",
       });
 
       // Fetch the page by URL
@@ -67,20 +83,23 @@ client.defineJob({
       // Limit the number of headings
       headings.splice(MAX_HEADING_COUNT);
 
-      await io.createStatus("headings", {
+      fetchHeadingsStatus.update("headings-fetched", {
         label: "Fetch headings",
         state: "success",
       });
 
       const prefix = `
-      Re-write each following landing page heading to be more impactful.
-      Limit prose.
-      Retain the rough length of headings.
-      Retain the order of the data.
+        Re-write each following landing page heading to be more impactful.
+        Limit prose.
+        Retain the rough length of headings.
+        Retain the order of the data.
       `;
       const prompt = `${prefix.trim()}\n\n${headings.join("\n")}`;
 
-      await io.logger.info("Prompt", { prompt });
+      const aiStatus = await io.createStatus("new-headings", {
+        label: "Generate new headings",
+        state: "loading",
+      });
 
       // Call the OpenAI API to generate new headings
       const response = await io.openai.createChatCompletion(
@@ -107,12 +126,14 @@ client.defineJob({
           text,
         }));
 
-      await io.createStatus("new-headings", {
+      await aiStatus.update("new-headings-complete", {
         label: "Generate new headings",
         state: "success",
-        data: {
-          headings: newHeadings,
-        },
+      });
+
+      const finalScreenshotStatus = await io.createStatus("remix", {
+        label: "Final screenshot",
+        state: "loading",
       });
 
       const newScreenshotRes = await fetch(WORKER_URL, {
@@ -124,7 +145,7 @@ client.defineJob({
       });
       const newScreenshot = await newScreenshotRes.text();
 
-      await io.createStatus("screenshot-modified", {
+      await finalScreenshotStatus.update("remixed", {
         label: "Final screenshot",
         state: "success",
         data: {

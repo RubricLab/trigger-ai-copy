@@ -52,54 +52,62 @@ function Dashboard() {
         </Button>
         <div className="w-96 h-28 text-dimmed">
           <div className="flex items-center gap-2">
-            {submitted && !statuses ? (
-              <Spinner className="w-5 h-5" />
-            ) : (
-              <CheckCircledIcon className="w-5 h-5 text-emerald-600" />
-            )}
-            <div>Starting up</div>
+            {submitted ? (
+              <>
+                {!statuses?.length ? (
+                  <Spinner className="w-5 h-5" />
+                ) : (
+                  <CheckCircledIcon className="w-5 h-5 text-emerald-600" />
+                )}
+                <div>Starting up</div>
+              </>
+            ) : null}
           </div>
           {statuses?.map((status) => (
             <div key={status.key} className="flex items-center gap-2">
-              <CheckCircledIcon className="w-5 h-5 text-emerald-600" />
+              {status.state === "loading" ? (
+                <Spinner className="w-5 h-5" />
+              ) : (
+                <CheckCircledIcon className="w-5 h-5 text-emerald-600" />
+              )}
               <div>{status.label}</div>
             </div>
           ))}
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-12 w-full grow">
-        <div className="space-y-4 flex flex-col items-end">
+      <div className="grid grid-cols-2 gap-12 w-full">
+        <div className="flex flex-col space-y-2 items-end">
           <h2>Current site:</h2>
-          {statuses?.some((s) => s.key === "screenshot") ? (
+          {statuses?.find(({ key }) => key === "screenshot")?.data?.url ? (
             <Image
               src={
-                statuses?.find((s) => s.key === "screenshot")?.data
+                statuses?.find(({ key }) => key === "screenshot")?.data
                   ?.url as string
               }
               width={500}
               height={600}
-              className="!rounded-md"
+              className="rounded"
               alt="Current website screenshot"
             />
           ) : (
-            <div className="w-[500px] h-full bg-slate-750 animate-pulse rounded-md" />
+            <div className="w-[500px] h-[400px] bg-red-900/20 animate-pulse rounded-md" />
           )}
         </div>
-        <div className="space-y-4 flex flex-col items-start">
+        <div className="flex flex-col space-y-2 items-start">
           <h2>Remixed:</h2>
-          {statuses?.some((s) => s.key === "screenshot-modified") ? (
+          {statuses?.find(({ key }) => key === "remix")?.data?.url ? (
             <Image
               src={
-                statuses?.find((s) => s.key === "screenshot-modified")?.data
+                statuses?.find(({ key }) => key === "remix")?.data
                   ?.url as string
               }
-              height={600}
               width={500}
-              className="!rounded-md"
+              height={600}
+              className="rounded"
               alt="New website screenshot"
             />
           ) : (
-            <div className="w-[500px] h-full bg-slate-750 animate-pulse rounded-md" />
+            <div className="w-[500px] h-[400px] bg-green-900/20 animate-pulse rounded-md" />
           )}
         </div>
       </div>
