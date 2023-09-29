@@ -6,10 +6,6 @@ export interface Env {
 	BUCKET_URL: string;
 }
 
-const wait = (ms: number): Promise<void> => {
-	return new Promise((resolve) => setTimeout(resolve, ms));
-};
-
 /**
  * Cloudflare Worker to collect headings from a client-rendered website
  */
@@ -20,7 +16,7 @@ const worker = {
 		}
 
 		const body = (await request.json()) as any;
-		const { url: pageUrl, newHeadings } = body;
+		const { url: pageUrl, newHeadings, fullPage = false } = body;
 
 		if (!pageUrl) {
 			return new Response("Please include a URL to visit");
@@ -40,16 +36,13 @@ const worker = {
 				deviceScaleFactor: 1,
 			});
 
-			await wait(3000);
-
 			if (newHeadings) {
+				const headings = await page.$$("h1, h2, h3");
 				for (const element of newHeadings) {
-					const heading = await page.$$("h1, h2, h3");
-
-					if (element.id < heading.length) {
+					if (element.id < headings.length) {
 						await page.evaluate(
 							(el, value) => (el.textContent = value),
-							heading[element.id],
+							headings[element.id],
 							element.text
 						);
 					}
@@ -57,7 +50,8 @@ const worker = {
 			}
 
 			const screenshotBuffer = await page.screenshot({
-				fullPage: true,
+				fullPage: fullPage,
+				captureBeyondViewport: fullPage,
 			});
 
 			await env.BUCKET.put(
