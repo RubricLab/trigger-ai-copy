@@ -11,11 +11,8 @@ export interface Env {
  */
 const worker = {
 	async fetch(request: Request, env: Env): Promise<Response> {
-		if (request.method !== "POST") {
-			return new Response("Please use the POST method", { status: 405 });
-		}
+		const body: any = await request.json();
 
-		const body = (await request.json()) as any;
 		const { url: pageUrl, newHeadings, fullPage = false } = body;
 
 		if (!pageUrl) {
@@ -32,8 +29,7 @@ const worker = {
 			await page.goto(url, { waitUntil: "networkidle0" });
 			await page.setViewport({
 				width: 1280,
-				height: 960,
-				deviceScaleFactor: 1,
+				height: 800,
 			});
 
 			if (newHeadings) {
@@ -52,17 +48,18 @@ const worker = {
 			const screenshotBuffer = await page.screenshot({
 				fullPage: fullPage,
 				captureBeyondViewport: fullPage,
+				type: "jpeg",
 			});
 
 			await env.BUCKET.put(
-				`${filename}${newHeadings ? "-remixed" : ""}.png`,
+				`${filename}${newHeadings ? "-remixed" : ""}.jpeg`,
 				screenshotBuffer
 			);
 
 			await browser.close();
 
 			return new Response(
-				`${env.BUCKET_URL}/${filename}${newHeadings ? "-remixed" : ""}.png`,
+				`${env.BUCKET_URL}/${filename}${newHeadings ? "-remixed" : ""}.jpeg`,
 				{
 					headers: {
 						"content-type": "text/plain",
