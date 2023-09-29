@@ -7,7 +7,7 @@ export interface Env {
 }
 
 /**
- * Cloudflare Worker to collect headings from a client-rendered website
+ * Cloudflare Worker to screenshot a page and optionally update its headings
  */
 const worker = {
 	async fetch(request: Request, env: Env): Promise<Response> {

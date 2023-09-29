@@ -4,7 +4,7 @@ import { z } from "zod";
 import { load } from "cheerio";
 
 const MAX_HEADING_LENGTH = 200;
-const MAX_HEADING_COUNT = 50;
+const MAX_HEADING_COUNT = 10;
 
 // Make sure to run `wrangler dev --remote` to test locally
 const WORKER_URL =
@@ -37,30 +37,29 @@ client.defineJob({
         state: "loading",
       });
 
-      const screenshotRes = await fetch(WORKER_URL, {
+      // Fetch initial screenshot in parallel with other tasks
+      fetch(WORKER_URL, {
         method: "POST",
         body: JSON.stringify({ url }),
-      });
-
-      const screenshot = await screenshotRes.text();
-
-      await initialScreenshotStatus.update("screenshotted", {
-        label: "Initial screenshot",
-        state: "success",
-        data: {
-          url: screenshot,
-        },
-      });
+      })
+        .then((res) => res.text())
+        .then((screenshot) => {
+          initialScreenshotStatus.update("screenshotted", {
+            label: "Initial screenshot",
+            state: "success",
+            data: {
+              url: screenshot,
+            },
+          });
+        });
 
       const fetchHeadingsStatus = await io.createStatus("headings", {
         label: "Fetch headings",
         state: "loading",
       });
 
-      // Fetch the page by URL
+      // Fetch and clean headings
       const page = await fetch(url);
-
-      // Query the page for heading elements
       const data = await page.text();
       const queryFunction = load(data);
       const headingElements = queryFunction("h1, h2, h3");
@@ -80,7 +79,6 @@ client.defineJob({
         }
       });
 
-      // Limit the number of headings
       headings.splice(MAX_HEADING_COUNT);
 
       fetchHeadingsStatus.update("headings-fetched", {
@@ -126,7 +124,7 @@ client.defineJob({
           text,
         }));
 
-      await aiStatus.update("new-headings-complete", {
+      aiStatus.update("new-headings-complete", {
         label: "Generate new headings",
         state: "success",
       });
