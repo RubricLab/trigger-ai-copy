@@ -7,8 +7,8 @@ Welcome to CopyPrettifier! Try it for free [here](https://copyai.rubric.sh).
 First, install dependencies and run the development server:
 
 ```bash
-npm i
-npm run dev
+bun i
+bun run dev
 ```
 
 For this step, you may need to [create an account on Trigger.dev](https://cloud.trigger.dev/login?redirectTo=%2F). You can log in with your GitHub account.
