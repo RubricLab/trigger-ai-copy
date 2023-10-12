@@ -16,18 +16,11 @@ const worker = {
 			// Forward request to the durable browser
 			let browserId = env.BROWSER.idFromName("DurableBrowser");
 			let durableBrowser = env.BROWSER.get(browserId);
-			const res = await durableBrowser.fetch(request);
-			const {
-				filename,
-				newHeadings,
-			}: {
-				filename: string;
-				newHeadings?: string[];
-			} = await res.json();
 
-			const fileUrl = `${env.BUCKET_URL}/${filename}${
-				newHeadings ? "-remixed" : ""
-			}.jpeg`;
+			const res = await durableBrowser.fetch(request);
+
+			const fileName: string = await res.text();
+			const fileUrl = `${env.BUCKET_URL}/${fileName}`;
 
 			return new Response(fileUrl);
 		} catch (error) {
@@ -84,7 +77,13 @@ export class DurableBrowser {
 		}
 
 		const url = new URL(pageUrl).toString();
-		const filename = url.replace(/https:\/\//g, "").replace(/\.|\//g, "");
+		const siteName = url.replace(/https:\/\//g, "").replace(/\.|\//g, "");
+		const fileName = `${siteName}${newHeadings ? "-remixed" : ""}.jpeg`;
+
+		const cachedFile = await this.env.BUCKET.get(fileName);
+		if (cachedFile) {
+			return new Response(fileName);
+		}
 
 		try {
 			const page = await this.browser.newPage();
@@ -114,10 +113,7 @@ export class DurableBrowser {
 				type: "jpeg",
 			});
 
-			await this.env.BUCKET.put(
-				`${filename}${newHeadings ? "-remixed" : ""}.jpeg`,
-				screenshotBuffer
-			);
+			await this.env.BUCKET.put(fileName, screenshotBuffer);
 
 			// Reset keptAlive after performing tasks to the DO.
 			this.secondsAlive = 0;
@@ -127,22 +123,10 @@ export class DurableBrowser {
 				this.storage.setAlarm(Date.now() + tenSeconds);
 			}
 
-			return new Response(
-				JSON.stringify({
-					filename,
-					newHeadings,
-				}),
-				{
-					headers: {
-						"content-type": "application/json",
-					},
-				}
-			);
+			return new Response(fileName);
 		} catch (error) {
 			console.error("Failed to read page", error);
-			return new Response(JSON.stringify({ error: "Failed to read page" }), {
-				status: 500,
-			});
+			return new Response("Failed to read page", { status: 500 });
 		}
 	}
 
