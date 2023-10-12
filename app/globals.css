@@ -18,4 +18,39 @@
   h3 {
     @apply text-lg font-sans text-dimmed;
   }
+  .border-dashed-wide {
+    height: 100%;
+    width: 100%;
+    background-image: repeating-linear-gradient(
+        to right,
+        #1e293b 0%,
+        #1e293b 50%,
+        transparent 50%,
+        transparent 100%
+      ),
+      repeating-linear-gradient(
+        to right,
+        #1e293b 0%,
+        #1e293b 50%,
+        transparent 50%,
+        transparent 100%
+      ),
+      repeating-linear-gradient(
+        to bottom,
+        #1e293b 0%,
+        #1e293b 50%,
+        transparent 50%,
+        transparent 100%
+      ),
+      repeating-linear-gradient(
+        to bottom,
+        #1e293b 0%,
+        #1e293b 50%,
+        transparent 50%,
+        transparent 100%
+      );
+    background-position: left top, left bottom, left top, right top;
+    background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+    background-size: 20px 2px, 20px 2px, 2px 20px, 2px 20px;
+  }
 }
