@@ -23,13 +23,14 @@ client.defineJob({
     name: "remix.event",
     schema: z.object({
       url: z.string().url(),
+      voice: z.string().optional(),
     }) as any,
   }),
   integrations: {
     openai,
   },
   run: async (payload, io, _) => {
-    const { url } = payload;
+    const { url, voice } = payload;
 
     try {
       const initialScreenshotStatus = await io.createStatus("screenshot", {
@@ -87,7 +88,10 @@ client.defineJob({
       });
 
       const prefix = `
-        Re-write each following landing page heading to be more impactful.
+        You're a copywriting pro.
+        You'll re-write the following landing page headings${
+          voice ? " in the style of " + voice : ""
+        }!
         Limit prose.
         Retain the rough length of headings.
         Retain the order of the data.

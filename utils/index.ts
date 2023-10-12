@@ -1,3 +1,6 @@
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+
 /**
  * Attempt to pull subdomain, hostname, and pathname (no params) from a URL-like string.
  * @returns a valid URL, otherwise null
@@ -26,3 +29,7 @@ export const validateUrl = (url: string): string | null => {
     return null;
   }
 };
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}

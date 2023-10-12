@@ -81,7 +81,7 @@ export class DurableBrowser {
 		const fileName = `${siteName}${newHeadings ? "-remixed" : ""}.jpeg`;
 
 		const cachedFile = await this.env.BUCKET.get(fileName);
-		if (cachedFile) {
+		if (cachedFile && !newHeadings) {
 			return new Response(fileName);
 		}
 
@@ -90,7 +90,7 @@ export class DurableBrowser {
 			await page.goto(url, { waitUntil: "networkidle0" });
 			await page.setViewport({
 				width: 1280,
-				height: 800,
+				height: 960,
 			});
 
 			// Loop over and replace headings if applicable

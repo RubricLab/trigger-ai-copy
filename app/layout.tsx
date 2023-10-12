@@ -2,6 +2,7 @@ import { TriggerProvider } from "@trigger.dev/react";
 import "./globals.css";
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
+import { Toaster } from "react-hot-toast";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -21,6 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={poppins.className}>
+        <Toaster position="top-center" />
         <TriggerProvider
           publicApiKey={process.env.NEXT_PUBLIC_CLIENT_TRIGGER_API_KEY ?? ""}
           apiUrl={process.env.NEXT_PUBLIC_TRIGGER_API_URL}
