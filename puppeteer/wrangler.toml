@@ -3,7 +3,7 @@ main = "src/index.ts"
 compatibility_date = "2023-09-04"
 compatibility_flags = [ "nodejs_compat" ]
 
-browser = { binding = "BROWSER" }
+browser = { binding = "FETCHER" }
 
 [[r2_buckets]]
 binding = 'BUCKET'
@@ -12,3 +12,11 @@ preview_bucket_name = 'test-bucket'
 
 [vars]
 BUCKET_URL = "https://pub-04cd4de7299e4dbf942ccff55ae279d1.r2.dev"
+
+[[durable_objects.bindings]]
+name = "BROWSER"
+class_name = "DurableBrowser"
+
+[[migrations]]
+tag = "v1" # Should be unique for each entry
+new_classes = ["DurableBrowser"]
