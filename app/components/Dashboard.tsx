@@ -7,8 +7,6 @@ import { callTrigger } from "../actions";
 import { Button } from "./Button";
 import { useEventRunStatuses } from "@trigger.dev/react";
 import Image from "next/image";
-// import { CheckCircledIcon } from "@radix-ui/react-icons";
-// import { Spinner } from "./Spinner";
 import toast from "react-hot-toast";
 
 const voices: Array<{ label: string; value: string }> = [
@@ -94,51 +92,14 @@ function Dashboard() {
         <Button disabled={!validUrl || loading} type="submit">
           Generate
         </Button>
-        {/* <div className="w-96 h-28 text-dimmed">
-          <div className="flex items-center gap-2">
-            {submitted ? (
-              <>
-                {!statuses?.length ? (
-                  <Spinner className="w-5 h-5" />
-                ) : (
-                  <CheckCircledIcon className="w-5 h-5 text-emerald-600" />
-                )}
-                <div>Starting up</div>
-              </>
-            ) : null}
-          </div>
-          {statuses?.map((status) => (
-            <div key={status.key} className="flex items-center gap-2">
-              {status.state === "loading" ? (
-                <Spinner className="w-5 h-5" />
-              ) : (
-                <CheckCircledIcon className="w-5 h-5 text-emerald-600" />
-              )}
-              <div>{status.label}</div>
-            </div>
-          ))}
-        </div> */}
       </div>
-      <div className="grid grid-cols-2 gap-12 w-full border-dashed-wide p-8 rounded-lg">
-        <div className="flex flex-col space-y-2 items-end">
-          <h2>Current site:</h2>
-          {statuses?.find(({ key }) => key === "screenshot")?.data?.url ? (
-            <Image
-              src={
-                statuses?.find(({ key }) => key === "screenshot")?.data
-                  ?.url as string
-              }
-              width={500}
-              height={600}
-              className="rounded"
-              alt="Current website screenshot"
-            />
-          ) : (
-            <div className="w-[500px] h-[400px] bg-red-900/20 animate-pulse rounded-md" />
-          )}
-        </div>
+      <div
+        className={cn(
+          "w-full p-8 rounded-lg",
+          submitted ? "border border-midnight-800" : "border-dashed-wide"
+        )}
+      >
         <div className="flex flex-col space-y-2 items-start">
-          <h2>Remixed:</h2>
           {statuses?.find(({ key }) => key === "remix")?.data?.url ? (
             <Image
               src={
@@ -151,7 +112,11 @@ function Dashboard() {
               alt="New website screenshot"
             />
           ) : (
-            <div className="w-[500px] h-[400px] bg-green-900/20 animate-pulse rounded-md" />
+            <div className="w-full h-[600px] bg-green-900/20 animate-pulse rounded-md">
+              {validUrl ? (
+                <iframe src={validUrl} className="w-full h-full" />
+              ) : null}
+            </div>
           )}
         </div>
       </div>
