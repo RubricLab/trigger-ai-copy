@@ -58,11 +58,14 @@ function Dashboard() {
   }, [statuses]);
 
   return (
-    <form action={submit} className="w-full grow p-12 pt-32 space-y-12">
-      <div className="flex items-end justify-start flex-wrap w-full gap-4">
+    <form
+      action={submit}
+      className="w-full grow p-12 pt-32 space-y-12 max-w-7xl"
+    >
+      <div className="flex items-end justify-between flex-wrap w-full gap-4">
         <Input
           label="Your landing page:"
-          className={validUrl ? "!ring-green-400/60" : ""}
+          className={cn({ "!ring-green-400/60": validUrl })}
           placeholder="trigger.dev"
           onChange={setPageUrl}
           clearable
@@ -96,33 +99,42 @@ function Dashboard() {
       <div
         className={cn(
           "w-full rounded-lg",
-          submitted ? "border border-midnight-800" : "border-dashed-wide"
+          submitted ? "border-2 border-midnight-800" : "border-dashed-wide"
         )}
       >
-        <div className="h-10 rounded-t-lg w-full border-dashed-wide flex gap-1.5 items-center pl-3">
-          <div className="w-3.5 h-3.5 rounded-full bg-midnight-800" />
-          <div className="w-3.5 h-3.5 rounded-full bg-midnight-800" />
-          <div className="w-3.5 h-3.5 rounded-full bg-midnight-800" />
+        <div
+          className={cn(
+            "h-10 rounded-t-lg w-full flex gap-1.5 items-center pl-3",
+            submitted
+              ? "border-b-2 border-midnight-800 bg-midnight-800"
+              : "border-dashed-wide"
+          )}
+        >
+          {Array(3)
+            .fill(0)
+            .map((_, i) => (
+              <div
+                key={i}
+                className={cn(
+                  "w-3.5 h-3.5 rounded-full",
+                  submitted ? "bg-midnight-700" : "border-dashed-wide"
+                )}
+              />
+            ))}
         </div>
-        <div className="flex flex-col space-y-2 items-start p-8">
+        <div className="flex flex-col space-y-2 items-start relative w-full h-[600px] p-0.5 pt-0">
           {statuses?.find(({ key }) => key === "remix")?.data?.url ? (
             <Image
               src={
                 statuses?.find(({ key }) => key === "remix")?.data
                   ?.url as string
               }
-              width={500}
-              height={600}
-              className="rounded"
+              fill
               alt="New website screenshot"
             />
-          ) : (
-            <div className="w-full h-[600px] bg-midnight-800/20 rounded-md">
-              {validUrl ? (
-                <iframe src={validUrl} className="w-full h-full" />
-              ) : null}
-            </div>
-          )}
+          ) : validUrl ? (
+            <iframe src={validUrl} className="w-full h-full" />
+          ) : null}
         </div>
       </div>
     </form>
