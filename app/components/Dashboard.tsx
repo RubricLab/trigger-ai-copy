@@ -95,11 +95,16 @@ function Dashboard() {
       </div>
       <div
         className={cn(
-          "w-full p-8 rounded-lg",
+          "w-full rounded-lg",
           submitted ? "border border-midnight-800" : "border-dashed-wide"
         )}
       >
-        <div className="flex flex-col space-y-2 items-start">
+        <div className="h-10 rounded-t-lg w-full border-dashed-wide flex gap-1.5 items-center pl-3">
+          <div className="w-3.5 h-3.5 rounded-full bg-midnight-800" />
+          <div className="w-3.5 h-3.5 rounded-full bg-midnight-800" />
+          <div className="w-3.5 h-3.5 rounded-full bg-midnight-800" />
+        </div>
+        <div className="flex flex-col space-y-2 items-start p-8">
           {statuses?.find(({ key }) => key === "remix")?.data?.url ? (
             <Image
               src={
@@ -112,7 +117,7 @@ function Dashboard() {
               alt="New website screenshot"
             />
           ) : (
-            <div className="w-full h-[600px] bg-green-900/20 animate-pulse rounded-md">
+            <div className="w-full h-[600px] bg-midnight-800/20 rounded-md">
               {validUrl ? (
                 <iframe src={validUrl} className="w-full h-full" />
               ) : null}
