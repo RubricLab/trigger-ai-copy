@@ -5,12 +5,7 @@ import { load } from "cheerio";
 
 const MAX_HEADING_LENGTH = 200;
 const MAX_HEADING_COUNT = 10;
-
-// Make sure to run `wrangler dev --remote` to test locally
-const WORKER_URL =
-  process.env.NODE_ENV === "development"
-    ? "http://127.0.0.1:8787"
-    : "https://puppeteer.tedspare.workers.dev";
+const WORKER_URL = "https://puppeteer.tedspare.workers.dev";
 
 /**
  * Trigger.dev job to collect headings from a server-side rendered website
@@ -39,25 +34,25 @@ client.defineJob({
       });
 
       // Fetch initial screenshot in parallel with other tasks
-      await fetch(WORKER_URL, {
-        method: "POST",
-        body: JSON.stringify({ url }),
-      })
-        .then((res) => res.text())
-        .then((screenshot) => {
-          console.log("-----> IN HERE");
-
-          initialScreenshotStatus.update("screenshot", {
-            label: "Initial screenshot",
-            state: "success",
-            data: {
-              url: screenshot,
-            },
+      await io.runTask("initial-screenshot", async () => {
+        await fetch(WORKER_URL, {
+          method: "POST",
+          body: JSON.stringify({ url }),
+        })
+          .then((res) => res.json())
+          .then(({ fileUrl }) => {
+            initialScreenshotStatus.update("screenshotted", {
+              label: "Initial screenshot",
+              state: "success",
+              data: {
+                url: fileUrl,
+              },
+            });
           });
-        });
+      });
 
       const fetchHeadingsStatus = await io.createStatus("headings", {
-        label: "Fetching headings",
+        label: "Fetching headings with Trigger",
         state: "loading",
       });
 
@@ -89,7 +84,7 @@ client.defineJob({
       });
 
       fetchHeadingsStatus.update("headings-fetched", {
-        label: "Fetched headings",
+        label: "Fetched headings with Trigger",
         state: "success",
       });
 
@@ -140,33 +135,31 @@ Retain the order of the data.
       });
 
       const finalScreenshotStatus = await io.createStatus("remix", {
-        label: "Waiting for Cloudflare",
+        label: "Waiting for second screenshot",
         state: "loading",
       });
 
-      const secondScreenshotRes = await io.backgroundFetch<any>(
-        "new-screenshot-fetch",
-        WORKER_URL,
-        {
+      await io.runTask("new-screenshot", async () => {
+        await fetch(WORKER_URL, {
           method: "POST",
           body: JSON.stringify({
             url,
             newHeadings,
           }),
-        }
-      );
-
-      const { fileUrl } = await secondScreenshotRes.json();
-
-      await finalScreenshotStatus.update("remixed", {
-        label: "Final screenshot",
-        state: "success",
-        data: {
-          url: fileUrl,
-        },
+        })
+          .then((res) => res.json())
+          .then(async ({ fileUrl }) => {
+            await finalScreenshotStatus.update("remixed", {
+              label: "New screenshot",
+              state: "success",
+              data: {
+                url: fileUrl,
+              },
+            });
+          });
       });
 
-      return { url: fileUrl };
+      return;
     } catch (error) {
       io.logger.error("Failed to remix page", { error });
       return { message: "error" };
