@@ -145,6 +145,7 @@ Retain the order of the data.
           body: JSON.stringify({
             url,
             newHeadings,
+            voice,
           }),
         })
           .then((res) => res.json())

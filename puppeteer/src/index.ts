@@ -72,7 +72,7 @@ export class DurableBrowser {
 
 		const body: any = await request.json();
 
-		const { url: pageUrl, newHeadings, fullPage = false } = body;
+		const { url: pageUrl, newHeadings, voice, fullPage = false } = body;
 
 		if (!pageUrl) {
 			return new Response("Please include a URL to visit");
@@ -80,7 +80,7 @@ export class DurableBrowser {
 
 		const url = new URL(pageUrl).toString();
 		const siteName = url.replace(/https:\/\//g, "").replace(/\.|\//g, "");
-		const fileName = `${siteName}${newHeadings ? "-remixed" : ""}.jpeg`;
+		const fileName = `${siteName}${voice ? "-" + voice : ""}.jpeg`;
 
 		const cachedFile = await this.env.BUCKET.get(fileName);
 		if (cachedFile && !newHeadings) {
@@ -89,7 +89,7 @@ export class DurableBrowser {
 
 		try {
 			const page = await this.browser.newPage();
-			await page.goto(url, { waitUntil: "networkidle0" });
+			await page.goto(url, { waitUntil: "networkidle2" });
 			await page.setViewport({
 				width: 1280,
 				height: 960,
