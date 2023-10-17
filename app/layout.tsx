@@ -25,6 +25,7 @@ export default function RootLayout({
         <Toaster
           position="bottom-center"
           expand
+          richColors
           toastOptions={{
             className:
               "!bg-midnight-900 border !border-midnight-800 !text-bright",
