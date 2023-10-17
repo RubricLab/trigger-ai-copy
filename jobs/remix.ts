@@ -34,18 +34,20 @@ client.defineJob({
 
     try {
       const initialScreenshotStatus = await io.createStatus("screenshot", {
-        label: "Initial screenshot",
+        label: "Waiting for Cloudflare",
         state: "loading",
       });
 
       // Fetch initial screenshot in parallel with other tasks
-      fetch(WORKER_URL, {
+      await fetch(WORKER_URL, {
         method: "POST",
         body: JSON.stringify({ url }),
       })
         .then((res) => res.text())
         .then((screenshot) => {
-          initialScreenshotStatus.update("screenshotted", {
+          console.log("-----> IN HERE");
+
+          initialScreenshotStatus.update("screenshot", {
             label: "Initial screenshot",
             state: "success",
             data: {
@@ -55,7 +57,7 @@ client.defineJob({
         });
 
       const fetchHeadingsStatus = await io.createStatus("headings", {
-        label: "Fetch headings",
+        label: "Fetching headings",
         state: "loading",
       });
 
@@ -87,28 +89,28 @@ client.defineJob({
       });
 
       fetchHeadingsStatus.update("headings-fetched", {
-        label: "Fetch headings",
+        label: "Fetched headings",
         state: "success",
       });
 
       const prefix = `
-        You're a copywriting pro.
-        You'll re-write the following landing page headings${
-          voice ? " in the style of " + voice : ""
-        }!
-        Limit prose.
-        Retain the rough length of headings.
-        Retain the order of the data.
+You're a copywriting pro.
+You'll re-write the following landing page headings${
+        voice ? " in the style of " + voice : ""
+      }!
+Limit prose.
+Retain the rough length of headings.
+Retain the order of the data.
       `;
       const prompt = `${prefix.trim()}\n\n${headings.join("\n")}`;
 
       const aiStatus = await io.createStatus("new-headings", {
-        label: "Generate new headings",
+        label: "Waiting for OpenAI",
         state: "loading",
       });
 
       // Call the OpenAI API to generate new headings
-      const response = await io.openai.createChatCompletion(
+      const openaiResponse = await io.openai.createChatCompletion(
         "openai-completions-api",
         {
           model: "gpt-3.5-turbo",
@@ -121,11 +123,11 @@ client.defineJob({
         }
       );
 
-      if (!response?.choices?.length) {
+      if (!openaiResponse?.choices?.length) {
         throw new Error("OpenAI failed to return a response");
       }
 
-      const newHeadings = response.choices[0].message?.content
+      const newHeadings = openaiResponse.choices[0].message?.content
         ?.split("\n")
         .map((text: string, index: number) => ({
           id: index,
@@ -133,16 +135,16 @@ client.defineJob({
         }));
 
       aiStatus.update("new-headings-complete", {
-        label: "Generate new headings",
+        label: "Generated new headings with OpenAI",
         state: "success",
       });
 
       const finalScreenshotStatus = await io.createStatus("remix", {
-        label: "Final screenshot",
+        label: "Waiting for Cloudflare",
         state: "loading",
       });
 
-      const { fileUrl } = await io.backgroundFetch<{ fileUrl: string }>(
+      const secondScreenshotRes = await io.backgroundFetch<any>(
         "new-screenshot-fetch",
         WORKER_URL,
         {
@@ -153,6 +155,8 @@ client.defineJob({
           }),
         }
       );
+
+      const { fileUrl } = await secondScreenshotRes.json();
 
       await finalScreenshotStatus.update("remixed", {
         label: "Final screenshot",

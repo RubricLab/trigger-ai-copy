@@ -7,7 +7,7 @@ import { callTrigger } from "../actions";
 import { Button } from "./Button";
 import { useEventRunStatuses } from "@trigger.dev/react";
 import Image from "next/image";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 const voices: Array<{ label: string; value: string }> = [
   { label: "✨ Useful", value: "useful" },
@@ -53,8 +53,41 @@ function Dashboard() {
     }
 
     statuses?.map((status) => {
-      if (!status.history?.length) toast(status.label);
+      if (!status.history?.length) {
+        toast.promise(
+          new Promise((resolve) => {
+            setTimeout(resolve, 2000);
+          }),
+          {
+            success: status.label,
+            error: status.label,
+            loading: status.label,
+          }
+        );
+      } else {
+        toast.success(status.label);
+      }
     });
+    console.log(statuses);
+
+    // statuses?.map((status) => {
+    //   if (!status.history?.length) {
+    //     toast.promise(somePromise, {
+    //       loading: "Loading text...",
+    //       success: "Success text!",
+    //       error: "Error text...",
+    //     });
+    //   } else {
+    //     // If a history exists, resolve somePromise
+    //     somePromise
+    //       .then((response) => {
+    //         console.log("Promise resolved with:", response);
+    //       })
+    //       .catch((error) => {
+    //         console.error("Promise rejected with:", error);
+    //       });
+    //   }
+    // });
   }, [statuses]);
 
   return (
@@ -122,18 +155,25 @@ function Dashboard() {
               />
             ))}
         </div>
-        <div className="flex flex-col space-y-2 items-start relative w-full h-[600px] p-0.5 pt-0">
-          {statuses?.find(({ key }) => key === "remix")?.data?.url ? (
+        <div className="flex flex-col space-y-2 items-start relative w-full h-screen p-0.5 pt-0">
+          {statuses?.find(({ key }) => key === "screenshot")?.data?.url ? (
             <Image
               src={
-                statuses?.find(({ key }) => key === "remix")?.data
+                statuses?.find(({ key }) => key === "screenshot")?.data
                   ?.url as string
               }
               fill
               alt="New website screenshot"
             />
-          ) : validUrl ? (
-            <iframe src={validUrl} className="w-full h-full" />
+          ) : statuses?.find(({ key }) => key === "remixed")?.data?.url ? (
+            <Image
+              src={
+                statuses?.find(({ key }) => key === "remixed")?.data
+                  ?.url as string
+              }
+              fill
+              alt="New website screenshot"
+            />
           ) : null}
         </div>
       </div>
