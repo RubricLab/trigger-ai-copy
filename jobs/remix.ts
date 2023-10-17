@@ -61,7 +61,7 @@ client.defineJob({
 
       // Fetch and clean headings
       const headings = await io.runTask("fetch-site", async () => {
-        const page = await fetch("fetch-site", url);
+        const page = await fetch(url);
         const data = await page.text();
         const queryFunction = load(data);
         const headingElements = queryFunction("h1, h2, h3");
