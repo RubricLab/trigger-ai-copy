@@ -19,6 +19,8 @@ const worker = {
 
 			const res = await durableBrowser.fetch(request);
 
+			if (res.status === 500) return res;
+
 			const fileName: string = await res.text();
 			const fileUrl = `${env.BUCKET_URL}/${fileName}`;
 
