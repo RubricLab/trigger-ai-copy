@@ -60,27 +60,31 @@ client.defineJob({
       });
 
       // Fetch and clean headings
-      const page = await fetch(url);
-      const data = await page.text();
-      const queryFunction = load(data);
-      const headingElements = queryFunction("h1, h2, h3");
+      const headings = await io.runTask("fetch-site", async () => {
+        const page = await fetch("fetch-site", url);
+        const data = await page.text();
+        const queryFunction = load(data);
+        const headingElements = queryFunction("h1, h2, h3");
 
-      const headings: string[] = [];
+        const headings: string[] = [];
 
-      headingElements.each((_, element) => {
-        const elementText = queryFunction(element)?.text?.();
+        headingElements.each((_, element) => {
+          const elementText = queryFunction(element)?.text?.();
 
-        if (typeof elementText === "string" && elementText.trim() !== "") {
-          headings.push(
-            elementText
-              .trim()
-              .replace(/\s+/g, " ")
-              .substring(0, MAX_HEADING_LENGTH)
-          );
-        }
+          if (typeof elementText === "string" && elementText.trim() !== "") {
+            headings.push(
+              elementText
+                .trim()
+                .replace(/\s+/g, " ")
+                .substring(0, MAX_HEADING_LENGTH)
+            );
+          }
+        });
+
+        headings.splice(MAX_HEADING_COUNT);
+
+        return headings;
       });
-
-      headings.splice(MAX_HEADING_COUNT);
 
       fetchHeadingsStatus.update("headings-fetched", {
         label: "Fetch headings",
