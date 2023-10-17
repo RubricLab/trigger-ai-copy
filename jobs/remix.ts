@@ -142,24 +142,27 @@ client.defineJob({
         state: "loading",
       });
 
-      const newScreenshotRes = await fetch(WORKER_URL, {
-        method: "POST",
-        body: JSON.stringify({
-          url,
-          newHeadings,
-        }),
-      });
-      const newScreenshot = await newScreenshotRes.text();
+      const { fileUrl } = await io.backgroundFetch<{ fileUrl: string }>(
+        "new-screenshot-fetch",
+        WORKER_URL,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            url,
+            newHeadings,
+          }),
+        }
+      );
 
       await finalScreenshotStatus.update("remixed", {
         label: "Final screenshot",
         state: "success",
         data: {
-          url: newScreenshot,
+          url: fileUrl,
         },
       });
 
-      return { url: newScreenshot };
+      return { url: fileUrl };
     } catch (error) {
       io.logger.error("Failed to remix page", { error });
       return { message: "error" };

@@ -22,7 +22,7 @@ const worker = {
 			const fileName: string = await res.text();
 			const fileUrl = `${env.BUCKET_URL}/${fileName}`;
 
-			return new Response(fileUrl);
+			return new Response(JSON.stringify({ fileUrl }));
 		} catch (error) {
 			console.error("Failed to reach browser", error);
 			return new Response("Failed to reach browser", { status: 500 });
