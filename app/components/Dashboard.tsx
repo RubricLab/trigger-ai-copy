@@ -123,7 +123,7 @@ function Dashboard() {
             "h-10 rounded-t-lg w-full flex items-center justify-between",
             submitted
               ? "border-b-2 border-midnight-800 bg-midnight-800"
-              : "border-dashed-wide m-0.5"
+              : "border-dashed-wide p-0.5"
           )}
         >
           <div className="flex items-center gap-1.5 pl-3">
@@ -148,12 +148,14 @@ function Dashboard() {
           <div />
         </div>
         <div className="flex flex-col space-y-2 items-start relative w-full h-screen p-0.5 pt-0">
-          {after ? (
+          {!statuses?.find(({ key }) => key === "screenshot")?.data
+            ?.url ? null : after ? (
             <Image
               src={
                 statuses?.find(({ key }) => key === "remix")?.data
                   ?.url as string
               }
+              placeholder="empty"
               fill
               alt="New website screenshot"
             />
@@ -163,6 +165,7 @@ function Dashboard() {
                 statuses?.find(({ key }) => key === "screenshot")?.data
                   ?.url as string
               }
+              placeholder="empty"
               fill
               alt="Website screenshot"
             />
