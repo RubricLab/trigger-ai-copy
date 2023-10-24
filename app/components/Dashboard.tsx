@@ -8,6 +8,7 @@ import { Button } from "./Button";
 import { useEventRunStatuses } from "@trigger.dev/react";
 import Image from "next/image";
 import { toast } from "sonner";
+import { Switch } from "./Switch";
 
 const voices: Array<{ label: string; value: string }> = [
   { label: "✨ Useful", value: "useful" },
@@ -24,6 +25,7 @@ function Dashboard() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [voice, setVoice] = useState("useful");
+  const [after, setAfter] = useState(false);
 
   const validUrl = useMemo(() => validateUrl(pageUrl), [pageUrl]);
 
@@ -118,26 +120,35 @@ function Dashboard() {
       >
         <div
           className={cn(
-            "h-10 rounded-t-lg w-full flex gap-1.5 items-center pl-3",
+            "h-10 rounded-t-lg w-full flex items-center justify-between",
             submitted
               ? "border-b-2 border-midnight-800 bg-midnight-800"
-              : "border-dashed-wide"
+              : "border-dashed-wide m-0.5"
           )}
         >
-          {Array(3)
-            .fill(0)
-            .map((_, i) => (
-              <div
-                key={i}
-                className={cn(
-                  "w-3.5 h-3.5 rounded-full",
-                  submitted ? "bg-midnight-700" : "border-dashed-wide"
-                )}
-              />
-            ))}
+          <div className="flex items-center gap-1.5 pl-3">
+            {Array(3)
+              .fill(0)
+              .map((_, i) => (
+                <div
+                  key={i}
+                  className={cn(
+                    "w-3.5 h-3.5 rounded-full",
+                    submitted ? "bg-midnight-700" : "border-dashed-wide"
+                  )}
+                />
+              ))}
+          </div>
+          <Switch
+            className={submitted ? "visible" : "invisible"}
+            title="Before/after"
+            checked={after}
+            onCheckedChange={() => setAfter(!after)}
+          />
+          <div />
         </div>
         <div className="flex flex-col space-y-2 items-start relative w-full h-screen p-0.5 pt-0">
-          {statuses?.find(({ key }) => key === "remix")?.data ? (
+          {after ? (
             <Image
               src={
                 statuses?.find(({ key }) => key === "remix")?.data
@@ -146,16 +157,16 @@ function Dashboard() {
               fill
               alt="New website screenshot"
             />
-          ) : statuses?.find(({ key }) => key === "screenshot")?.data ? (
+          ) : (
             <Image
               src={
                 statuses?.find(({ key }) => key === "screenshot")?.data
                   ?.url as string
               }
               fill
-              alt="New website screenshot"
+              alt="Website screenshot"
             />
-          ) : null}
+          )}
         </div>
       </div>
     </form>
