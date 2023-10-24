@@ -97,7 +97,7 @@ export class DurableBrowser {
 
 			// Loop over and replace headings if applicable
 			if (newHeadings) {
-				const headings = await page.$$("h1, h2, h3");
+				const headings = await page.$$("h1, h2, h3, p");
 				for (const element of newHeadings) {
 					if (element.id < headings.length) {
 						await page.evaluate(
