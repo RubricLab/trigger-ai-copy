@@ -36,7 +36,7 @@ function Input({
   }, [value]);
 
   return (
-    <div className="space-y-0.5 w-full max-w-sm group">
+    <div className="space-y-0.5 w-full max-w-xs group">
       {label && (
         <label className="font-medium text-sm text-dimmed" htmlFor={inputId}>
           {label}
