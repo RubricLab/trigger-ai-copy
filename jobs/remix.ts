@@ -61,6 +61,7 @@ client.defineJob({
       const headings = await io.runTask("fetch-site", async () => {
         const page = await fetch(url);
         const data = await page.text();
+
         const queryFunction = load(data);
         const headingElements = queryFunction("h1, h2, h3");
 
@@ -79,9 +80,7 @@ client.defineJob({
           }
         });
 
-        headings.splice(MAX_HEADING_COUNT);
-
-        return headings;
+        return headings.splice(MAX_HEADING_COUNT);
       });
 
       fetchHeadingsStatus.update("headings-fetched", {

@@ -50,7 +50,7 @@ function Dashboard() {
   }, [fetchStatus]);
 
   useEffect(() => {
-    if (!!statuses && !statuses?.length) {
+    if (statuses?.length === 0) {
       toast.success("Spin up Trigger");
       return;
     }
@@ -74,10 +74,7 @@ function Dashboard() {
   }, [statuses]);
 
   return (
-    <form
-      action={submit}
-      className="w-full grow p-12 pt-32 space-y-12 max-w-7xl"
-    >
+    <form action={submit} className="w-full grow p-12 pt-32 space-y-12">
       <div className="flex items-end justify-between flex-wrap w-full gap-4">
         <Input
           label="Your landing page:"
@@ -143,32 +140,46 @@ function Dashboard() {
             className={submitted ? "visible" : "invisible"}
             title="Before/after"
             checked={after}
+            disabled={!statuses?.find(({ key }) => key === "remix")?.data}
             onCheckedChange={() => setAfter(!after)}
           />
           <div />
         </div>
-        <div className="flex flex-col space-y-2 items-start relative w-full h-screen p-0.5 pt-0">
+        <div className="flex flex-col items-start justify-start relative w-full min-h-screen p-0.5 pt-0">
           {!statuses?.find(({ key }) => key === "screenshot")?.data
-            ?.url ? null : after ? (
-            <Image
-              src={
-                statuses?.find(({ key }) => key === "remix")?.data
-                  ?.url as string
-              }
-              placeholder="empty"
-              fill
-              alt="New website screenshot"
-            />
-          ) : (
-            <Image
-              src={
-                statuses?.find(({ key }) => key === "screenshot")?.data
-                  ?.url as string
-              }
-              placeholder="empty"
-              fill
-              alt="Website screenshot"
-            />
+            ?.url ? null : (
+            <>
+              <Image
+                src={
+                  statuses?.find(({ key }) => key === "remix")?.data
+                    ?.url as string
+                }
+                placeholder="empty"
+                fill
+                className={cn(
+                  after ? "opacity-100" : "opacity-0",
+                  "transition-opacity"
+                )}
+                objectFit="contain"
+                objectPosition="top"
+                alt="New website screenshot"
+              />
+              <Image
+                src={
+                  statuses?.find(({ key }) => key === "screenshot")?.data
+                    ?.url as string
+                }
+                placeholder="empty"
+                fill
+                className={cn(
+                  after ? "opacity-0" : "opacity-100",
+                  "transition-opacity"
+                )}
+                objectFit="contain"
+                objectPosition="top"
+                alt="Website screenshot"
+              />
+            </>
           )}
         </div>
       </div>
