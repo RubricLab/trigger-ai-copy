@@ -75,10 +75,6 @@ function Dashboard() {
     });
   }, [statuses, setActiveToasts]);
 
-  useEffect(() => {
-    console.log(activeToasts);
-  }, [activeToasts]);
-
   return (
     <form
       action={submit}
