@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
@@ -6,9 +7,8 @@ import { cn, validateUrl } from "@/utils";
 import { callTrigger } from "../actions";
 import { Button } from "./Button";
 import { useEventRunStatuses } from "@trigger.dev/react";
-import Image from "next/image";
 import { toast } from "sonner";
-import { Switch } from "./Switch";
+import { Slider } from "./Slider";
 
 const voices: Array<{ label: string; value: string }> = [
   { label: "✨ Useful", value: "useful" },
@@ -25,7 +25,10 @@ function Dashboard() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [voice, setVoice] = useState("useful");
-  const [after, setAfter] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [activeToasts, setActiveToasts] = useState<
+    Array<{ key: string; toastId: string | number }>
+  >([]);
 
   const validUrl = useMemo(() => validateUrl(pageUrl), [pageUrl]);
 
@@ -44,37 +47,43 @@ function Dashboard() {
   const { statuses, fetchStatus } = useEventRunStatuses(eventId);
 
   useEffect(() => {
-    if (fetchStatus === "success") {
-      setLoading(false);
-    }
+    if (fetchStatus === "success") setLoading(false);
   }, [fetchStatus]);
 
   useEffect(() => {
-    if (statuses?.length === 0) {
+    if (statuses?.length == 0) {
       toast.success("Spin up Trigger");
       return;
     }
 
     statuses?.map((status) => {
-      if (!status.history?.length) {
-        toast.promise(
-          new Promise((resolve) => {
-            setTimeout(resolve, 5000);
-          }),
-          {
-            success: status.label,
-            error: status.label,
-            loading: status.label,
-          }
-        );
+      if (status.history.length === 0) {
+        const toastId = toast(status.label);
+
+        setActiveToasts((curr) => [...curr, { toastId, key: status.key }]);
+
+        toast.loading(status.label, { id: toastId });
       } else {
-        toast.success(status.label);
+        setActiveToasts((curr) => {
+          const toastId = curr.find((t) => t.key == status.key)?.toastId;
+
+          toast.success(status.label, toastId ? { id: toastId } : undefined);
+
+          return [...curr.filter((t) => t.key !== status.key)];
+        });
       }
     });
-  }, [statuses]);
+  }, [statuses, setActiveToasts]);
+
+  useEffect(() => {
+    console.log(activeToasts);
+  }, [activeToasts]);
 
   return (
-    <form action={submit} className="w-full grow p-12 pt-32 space-y-12">
+    <form
+      action={submit}
+      className="w-full max-w-7xl h-full flex flex-col grow p-12 pt-32 space-y-12"
+    >
       <div className="flex items-end justify-between flex-wrap w-full gap-4">
         <Input
           label="Your landing page:"
@@ -111,7 +120,7 @@ function Dashboard() {
       </div>
       <div
         className={cn(
-          "w-full rounded-lg",
+          "w-full grow h-full flex flex-col rounded-lg",
           submitted ? "border-2 border-midnight-800" : "border-dashed-wide"
         )}
       >
@@ -136,47 +145,35 @@ function Dashboard() {
                 />
               ))}
           </div>
-          <Switch
-            className={submitted ? "visible" : "invisible"}
-            title="Before/after"
-            checked={after}
-            disabled={!statuses?.find(({ key }) => key === "remix")?.data}
-            onCheckedChange={() => setAfter(!after)}
+          <Slider
+            labelBefore="Before"
+            labelAfter="After"
+            disabled={!statuses?.find(({ key }) => key == "screenshot")?.data}
+            className="w-56 mr-4"
+            onValueChange={(value) => setProgress(value[0] || 0)}
           />
           <div />
         </div>
-        <div className="flex flex-col items-start justify-start relative w-full min-h-screen p-0.5 pt-0">
-          {!statuses?.find(({ key }) => key === "screenshot")?.data
+        <div className="relative grow p-0.5 pt-0 max-h-full overflow-y-scroll">
+          {!statuses?.find(({ key }) => key == "screenshot")?.data
             ?.url ? null : (
             <>
-              <Image
+              <img
                 src={
-                  statuses?.find(({ key }) => key === "remix")?.data
+                  statuses?.find(({ key }) => key == "remix")?.data
                     ?.url as string
                 }
-                placeholder="empty"
-                fill
-                className={cn(
-                  after ? "opacity-100" : "opacity-0",
-                  "transition-opacity"
-                )}
-                objectFit="contain"
-                objectPosition="top"
+                className="transition-opacity absolute rounded-b-md"
+                style={{ opacity: progress }}
                 alt="New website screenshot"
               />
-              <Image
+              <img
                 src={
-                  statuses?.find(({ key }) => key === "screenshot")?.data
+                  statuses?.find(({ key }) => key == "screenshot")?.data
                     ?.url as string
                 }
-                placeholder="empty"
-                fill
-                className={cn(
-                  after ? "opacity-0" : "opacity-100",
-                  "transition-opacity"
-                )}
-                objectFit="contain"
-                objectPosition="top"
+                className="transition-opacity absolute rounded-b-md"
+                style={{ opacity: 1 - progress }}
                 alt="Website screenshot"
               />
             </>

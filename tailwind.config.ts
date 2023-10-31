@@ -17,7 +17,7 @@ const slate = {
 /** Trigger.dev custom palette */
 const midnight = {
   ...colors.slate,
-  450: slate[850],
+  450: slate[600],
   500: slate[650],
   550: slate[700],
   600: slate[750],
