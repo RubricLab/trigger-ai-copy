@@ -5,7 +5,8 @@ import { load } from "cheerio";
 
 const MAX_HEADING_LENGTH = 200;
 const MAX_HEADING_COUNT = 10;
-const WORKER_URL = "https://puppeteer.tedspare.workers.dev";
+
+const workerUrl = process.env.WORKER_URL || "";
 
 /**
  * Trigger.dev job to collect headings from a server-side rendered website
@@ -35,7 +36,7 @@ client.defineJob({
 
       // Fetch initial screenshot in parallel with other tasks
       await io.runTask("initial-screenshot", async () => {
-        await fetch(WORKER_URL, {
+        await fetch(workerUrl, {
           method: "POST",
           body: JSON.stringify({ url }),
         })
@@ -140,7 +141,7 @@ Retain the order of the data.
       });
 
       await io.runTask("new-screenshot", async () => {
-        await fetch(WORKER_URL, {
+        await fetch(workerUrl, {
           method: "POST",
           body: JSON.stringify({
             url,

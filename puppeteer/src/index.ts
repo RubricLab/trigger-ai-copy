@@ -89,6 +89,7 @@ export class DurableBrowser {
 
 		try {
 			const page = await this.browser.newPage();
+
 			await page.goto(url, { waitUntil: "networkidle2" });
 			await page.setViewport({
 				width: 1280,
@@ -97,13 +98,14 @@ export class DurableBrowser {
 
 			// Loop over and replace headings if applicable
 			if (newHeadings) {
-				const headings = await page.$$("h1, h2, h3, p");
-				for (const element of newHeadings) {
-					if (element.id < headings.length) {
+				const headings = await page.$$("h1, h2, h3");
+
+				for (const newHeading of newHeadings) {
+					if (newHeading.id < headings.length) {
 						await page.evaluate(
 							(el: any, value: string) => (el.textContent = value),
-							headings[element.id],
-							element.text
+							headings[newHeading.id],
+							newHeading.text
 						);
 					}
 				}
