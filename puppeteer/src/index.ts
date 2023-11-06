@@ -83,6 +83,7 @@ export class DurableBrowser {
 		const fileName = `${siteName}${voice ? "-" + voice : ""}.jpeg`;
 
 		const cachedFile = await this.env.BUCKET.get(fileName);
+		console.log(`Browser: cached file: ${cachedFile}`);
 		if (cachedFile && !newHeadings) {
 			return new Response(fileName);
 		}
