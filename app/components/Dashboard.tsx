@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Input from "./Input";
 import { cn, validateUrl } from "@/utils";
 import { callTrigger } from "../actions";
@@ -9,6 +9,7 @@ import { Button } from "./Button";
 import { useEventRunStatuses } from "@trigger.dev/react";
 import { toast } from "sonner";
 import { Slider } from "./Slider";
+import { nanoid } from "nanoid";
 
 const voices: Array<{ label: string; value: string }> = [
   { label: "✨ Useful", value: "useful" },
@@ -32,18 +33,22 @@ function Dashboard() {
 
   const validUrl = useMemo(() => validateUrl(pageUrl), [pageUrl]);
 
-  const submit = async () => {
+  const submit = useCallback(async () => {
+    if (!validUrl) return;
+
     setEventId("");
     setLoading(true);
     setSubmitted(true);
     setProgress(0);
 
-    if (!validUrl) return;
-
-    const res = await callTrigger({ url: validUrl, voice });
+    const res = await callTrigger({
+      url: validUrl,
+      voice,
+      id: nanoid(),
+    });
 
     setEventId(res.id);
-  };
+  }, [validUrl, voice]);
 
   const { statuses, fetchStatus } = useEventRunStatuses(eventId);
 
@@ -145,6 +150,7 @@ function Dashboard() {
           <Slider
             leftLabel="Before"
             rightLabel="After"
+            value={[progress]}
             disabled={!statuses?.find(({ key }) => key == "screenshot")?.data}
             className="w-56 mr-4"
             onValueChange={(value) => setProgress(value[0] || 0)}

@@ -14,8 +14,8 @@ const worker = {
 	async fetch(request: Request, env: Env): Promise<Response> {
 		try {
 			// Forward request to the durable browser
-			let browserId = env.BROWSER.idFromName("browser");
-			let durableBrowser = env.BROWSER.get(browserId);
+			let browserId = await env.BROWSER.idFromName("browser");
+			let durableBrowser = await env.BROWSER.get(browserId);
 
 			const res = await durableBrowser.fetch(request);
 
@@ -71,7 +71,6 @@ export class DurableBrowser {
 		this.secondsAlive = 0;
 
 		const body: any = await request.json();
-
 		const { url: pageUrl, newHeadings, voice, fullPage = false } = body;
 
 		if (!pageUrl) {
@@ -83,7 +82,6 @@ export class DurableBrowser {
 		const fileName = `${siteName}${voice ? "-" + voice : ""}.jpeg`;
 
 		const cachedFile = await this.env.BUCKET.get(fileName);
-		console.log(`Browser: cached file: ${cachedFile}`);
 		if (cachedFile && !newHeadings) {
 			return new Response(fileName);
 		}
@@ -91,12 +89,8 @@ export class DurableBrowser {
 		try {
 			const page = await this.browser.newPage();
 
-			await page.setViewport({ width: 1536, height: 864 });
-			await page.goto(url, { waitUntil: "networkidle0" });
-			await page.setViewport({
-				width: 1280,
-				height: 960,
-			});
+			await page.setViewport({ width: 1280, height: 960 });
+			await page.goto(url, { waitUntil: "networkidle2" });
 
 			// Loop over and replace headings if applicable
 			if (newHeadings) {
@@ -126,7 +120,7 @@ export class DurableBrowser {
 			this.secondsAlive = 0;
 			let currentAlarm = await this.storage.getAlarm();
 			if (currentAlarm == null) {
-				console.log(`Browser: setting alarm`);
+				console.log("Browser: setting alarm");
 				await this.storage.setAlarm(Date.now() + tenSeconds);
 			}
 
@@ -146,7 +140,7 @@ export class DurableBrowser {
 			await this.storage.setAlarm(Date.now() + tenSeconds);
 		} else {
 			console.log(`Browser: past ${secondsToLive}s life. Shutting down.`);
-			await this.browser.close();
+			await this.browser?.close?.();
 		}
 	}
 }
