@@ -28,7 +28,7 @@ export default function RootLayout({
           richColors
           toastOptions={{
             className:
-              "!bg-midnight-900 border !border-midnight-800 !text-bright",
+              "!bg-midnight-750 text-lg border !border-midnight-800 !text-bright",
           }}
         />
         <TriggerProvider

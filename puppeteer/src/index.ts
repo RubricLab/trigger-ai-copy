@@ -19,7 +19,11 @@ const worker = {
 
 			const res = await durableBrowser.fetch(request);
 
-			if (res.status === 500) return res;
+			if (res.status === 500) {
+				const message = await res.text();
+				console.error("Screenshot failed: ", message);
+				return new Response(message, { status: 502 });
+			}
 
 			const fileName: string = await res.text();
 			const fileUrl = `${env.BUCKET_URL}/${fileName}`;
@@ -90,7 +94,10 @@ export class DurableBrowser {
 			const page = await this.browser.newPage();
 
 			await page.setViewport({ width: 1280, height: 960 });
-			await page.goto(url, { waitUntil: "networkidle2" });
+			await page.goto(url, {
+				waitUntil: "networkidle2",
+				timeout: 30 * 1000,
+			});
 
 			// Loop over and replace headings if applicable
 			if (newHeadings) {
@@ -126,8 +133,8 @@ export class DurableBrowser {
 
 			return new Response(fileName);
 		} catch (error) {
-			console.error("Failed to read page", error);
-			return new Response("Failed to read page", { status: 500 });
+			console.error(`Failed to read page: ${error}`);
+			return new Response(`Failed to read page: ${error}`, { status: 500 });
 		}
 	}
 

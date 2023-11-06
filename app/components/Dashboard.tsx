@@ -68,18 +68,30 @@ function Dashboard() {
 
         setActiveToasts((curr) => [...curr, { toastId, key: status.key }]);
 
-        toast.loading(status.label, { id: toastId });
+        toast.loading(status.label, { id: toastId, duration: 15 * 1000 });
       } else {
         setActiveToasts((curr) => {
           const toastId = curr.find((t) => t.key == status.key)?.toastId;
 
-          toast.success(status.label, toastId ? { id: toastId } : undefined);
+          toast.success(status.label, {
+            id: toastId || undefined,
+            duration: 3000,
+          });
+
+          toast.dismiss(toastId);
 
           return [...curr.filter((t) => t.key !== status.key)];
         });
       }
     });
   }, [statuses, setActiveToasts]);
+
+  useEffect(() => {
+    if (statuses?.find(({ key }) => key == "remix")?.data) {
+      toast.success("Check out your new copy!");
+      setProgress(1);
+    }
+  }, [statuses]);
 
   return (
     <form
@@ -151,7 +163,7 @@ function Dashboard() {
             leftLabel="Before"
             rightLabel="After"
             value={[progress]}
-            disabled={!statuses?.find(({ key }) => key == "screenshot")?.data}
+            disabled={!statuses?.find(({ key }) => key == "remix")?.data}
             className="w-56 mr-4"
             onValueChange={(value) => setProgress(value[0] || 0)}
           />

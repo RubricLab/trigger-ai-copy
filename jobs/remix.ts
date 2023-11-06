@@ -40,7 +40,10 @@ client.defineJob({
           method: "POST",
           body: JSON.stringify({ url }),
         })
-          .then((res) => res.json())
+          .then((res) => {
+            if (res.status > 200) throw new Error(res.statusText);
+            return res.json();
+          })
           .then(({ fileUrl }) => {
             initialScreenshotStatus.update("screenshotted", {
               label: "Initial screenshot",
@@ -49,7 +52,8 @@ client.defineJob({
                 url: fileUrl,
               },
             });
-          });
+          })
+          .catch(io.logger.error);
       });
 
       const fetchHeadingsStatus = await io.createStatus("headings", {
@@ -91,13 +95,13 @@ client.defineJob({
       const prefix = `
 You're a copywriting pro.
 You'll re-write the following landing page headings${
-        voice ? " in the style of " + voice : ""
+        voice ? " in the style of " + voice : "to be more useful"
       }!
 Limit prose.
-Retain the rough length of headings.
-Retain the order of the data.
+Keep headings the same length.
+Retain the order of headings.
       `;
-      const prompt = `${prefix.trim()}\n\n${headings.join("\n")}`;
+      const prompt = `${prefix.trim()}\n\nHeadings:\n${headings.join("\n")}`;
 
       const aiStatus = await io.createStatus("new-headings", {
         label: "Waiting for OpenAI",
@@ -108,7 +112,7 @@ Retain the order of the data.
       const openaiResponse = await io.openai.createChatCompletion(
         "openai-completions-api",
         {
-          model: "gpt-3.5-turbo",
+          model: "gpt-4-1106-preview",
           messages: [
             {
               role: "user",
@@ -148,7 +152,10 @@ Retain the order of the data.
             voice,
           }),
         })
-          .then((res) => res.json())
+          .then((res) => {
+            if (res.status > 200) throw new Error(res.statusText);
+            return res.json();
+          })
           .then(async ({ fileUrl }) => {
             await finalScreenshotStatus.update("remixed", {
               label: "New screenshot",
@@ -157,7 +164,8 @@ Retain the order of the data.
                 url: fileUrl,
               },
             });
-          });
+          })
+          .catch(io.logger.error);
       });
 
       return;
