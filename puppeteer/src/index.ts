@@ -14,7 +14,7 @@ const worker = {
 	async fetch(request: Request, env: Env): Promise<Response> {
 		try {
 			// Forward request to the durable browser
-			let browserId = env.BROWSER.idFromName("DurableBrowser");
+			let browserId = env.BROWSER.idFromName("browser");
 			let durableBrowser = env.BROWSER.get(browserId);
 
 			const res = await durableBrowser.fetch(request);
@@ -90,7 +90,8 @@ export class DurableBrowser {
 		try {
 			const page = await this.browser.newPage();
 
-			await page.goto(url, { waitUntil: "networkidle2" });
+			await page.setViewport({ width: 1536, height: 864 });
+			await page.goto(url, { waitUntil: "networkidle0" });
 			await page.setViewport({
 				width: 1280,
 				height: 960,
@@ -111,6 +112,7 @@ export class DurableBrowser {
 				}
 			}
 
+			// Take a screenshot
 			const screenshotBuffer = await page.screenshot({
 				fullPage: fullPage,
 				captureBeyondViewport: fullPage,
@@ -124,7 +126,7 @@ export class DurableBrowser {
 			let currentAlarm = await this.storage.getAlarm();
 			if (currentAlarm == null) {
 				console.log(`Browser: setting alarm`);
-				this.storage.setAlarm(Date.now() + tenSeconds);
+				await this.storage.setAlarm(Date.now() + tenSeconds);
 			}
 
 			return new Response(fileName);
@@ -140,7 +142,7 @@ export class DurableBrowser {
 
 		if (this.secondsAlive < secondsToLive) {
 			console.log(`Browser: up for ${this.secondsAlive}s. Extending lifespan.`);
-			this.storage.setAlarm(Date.now() + tenSeconds);
+			await this.storage.setAlarm(Date.now() + tenSeconds);
 		} else {
 			console.log(`Browser: past ${secondsToLive}s life. Shutting down.`);
 			await this.browser.close();

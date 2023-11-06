@@ -36,6 +36,7 @@ function Dashboard() {
     setEventId("");
     setLoading(true);
     setSubmitted(true);
+    setProgress(0);
 
     if (!validUrl) return;
 
@@ -142,8 +143,8 @@ function Dashboard() {
               ))}
           </div>
           <Slider
-            labelBefore="Before"
-            labelAfter="After"
+            leftLabel="Before"
+            rightLabel="After"
             disabled={!statuses?.find(({ key }) => key == "screenshot")?.data}
             className="w-56 mr-4"
             onValueChange={(value) => setProgress(value[0] || 0)}
