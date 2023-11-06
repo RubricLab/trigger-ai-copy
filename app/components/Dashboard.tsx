@@ -26,8 +26,8 @@ function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [voice, setVoice] = useState("useful");
   const [progress, setProgress] = useState(0);
-  const [activeToasts, setActiveToasts] = useState<
-    Array<{ key: string; toastId: string | number }>
+  const [_, setActiveToasts] = useState<
+    { key: string; toastId: string | number }[]
   >([]);
 
   const validUrl = useMemo(() => validateUrl(pageUrl), [pageUrl]);
