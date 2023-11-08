@@ -35,7 +35,7 @@ client.defineJob({
       });
 
       // Fetch initial screenshot in parallel with other tasks
-      await io.runTask("initial-screenshot", async () => {
+      io.runTask("initial-screenshot", async () => {
         await fetch(workerUrl, {
           method: "POST",
           body: JSON.stringify({ url }),
@@ -62,45 +62,42 @@ client.defineJob({
       });
 
       // Fetch and clean headings
-      const headings = await io.runTask("fetch-site", async () => {
-        const page = await fetch(url);
-        const data = await page.text();
+      const page = await fetch(url);
+      const data = await page.text();
 
-        const queryFunction = load(data);
-        const headingElements = queryFunction("h1, h2, h3");
+      const queryFunction = load(data, {}, false);
+      const headingElements = queryFunction("h1, h2, h3");
 
-        const headings: string[] = [];
+      let headings: string[] = [];
 
-        headingElements.each((_, element) => {
-          const elementText = queryFunction(element)?.text?.();
+      headingElements.each((_, element) => {
+        const elementText = queryFunction(element)?.text?.();
 
-          if (typeof elementText === "string" && elementText.trim() !== "") {
-            headings.push(
-              elementText
-                .trim()
-                .replace(/\s+/g, " ")
-                .substring(0, MAX_HEADING_LENGTH)
-            );
-          }
-        });
-
-        return headings.splice(MAX_HEADING_COUNT);
+        if (typeof elementText === "string" && elementText.trim() !== "") {
+          headings.push(
+            elementText
+              .trim()
+              .replace(/\s+/g, " ")
+              .substring(0, MAX_HEADING_LENGTH)
+          );
+        }
       });
 
+      headings = headings.slice(0, MAX_HEADING_COUNT);
+
       fetchHeadingsStatus.update("headings-fetched", {
-        label: "Fetched headings with Trigger",
+        label: "Fetched headings",
         state: "success",
       });
 
       const prefix = `
 You're a copywriting pro.
-You'll re-write the following landing page headings${
-        voice ? " in the style of " + voice : "to be more useful"
+You'll remix the following landing page headings ${
+        voice ? "in the style of " + voice : "to be more useful"
       }!
-Limit prose.
-Keep headings the same length.
-Retain the order of headings.
-Return the new copy directly; no prose nor formatting.
+Keep headings roughly the same length.
+Keep headings in the same order.
+Return the new copy directly.
       `;
       const prompt = `${prefix.trim()}\n\nHeadings:\n${headings.join("\n")}`;
 
@@ -145,34 +142,33 @@ Return the new copy directly; no prose nor formatting.
       });
 
       await io.runTask("new-screenshot", async () => {
-        await fetch(workerUrl, {
+        const res = await fetch(workerUrl, {
           method: "POST",
           body: JSON.stringify({
             url,
             newHeadings,
             voice,
           }),
-        })
-          .then((res) => {
-            if (res.status > 200) throw new Error(res.statusText);
-            return res.json();
-          })
-          .then(async ({ fileUrl }) => {
-            await finalScreenshotStatus.update("remixed", {
-              label: "New screenshot",
-              state: "success",
-              data: {
-                url: fileUrl,
-              },
-            });
-          })
-          .catch(io.logger.error);
+        });
+
+        if (res.status > 200) throw new Error(res.statusText);
+
+        const { fileUrl } = await res.json();
+
+        await finalScreenshotStatus.update("remixed", {
+          label: "New screenshot",
+          state: "success",
+          data: {
+            url: fileUrl,
+          },
+        });
       });
 
       return;
-    } catch (error) {
+    } catch (error: any) {
       io.logger.error("Failed to remix page", { error });
-      return { message: "error" };
+
+      throw new Error(error.message || "Failed to remix page");
     }
   },
 });
