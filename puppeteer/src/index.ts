@@ -1,10 +1,10 @@
 import puppeteer from "@cloudflare/puppeteer";
 
 export interface Env {
-	FETCHER: Fetcher;
 	BROWSER: DurableObjectNamespace;
 	BUCKET: R2Bucket;
 	BUCKET_URL: string;
+	BROWSERLESS_KEY: string;
 }
 
 /**
@@ -27,9 +27,9 @@ const worker = {
 			const cachedFile = await env.BUCKET.get(fileName);
 			// if (cachedFile && !newHeadings) return new Response(fileName);
 
+			const browserWSEndpoint = `wss://chrome.browserless.io?token=${env.BROWSERLESS_KEY}`;
 			const browser = await puppeteer.connect({
-				browserWSEndpoint:
-					"wss://chrome.browserless.io?token=b334a293-a856-4079-b372-fc688fbb5959",
+				browserWSEndpoint,
 			});
 
 			const page = await browser.newPage();

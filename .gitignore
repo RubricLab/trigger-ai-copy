@@ -37,3 +37,4 @@ next-env.d.ts
 
 puppeteer/node_modules/
 puppeteer/.wrangler/
+.dev.vars

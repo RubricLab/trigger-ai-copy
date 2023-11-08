@@ -3,12 +3,7 @@ main = "src/index.ts"
 compatibility_date = "2023-09-04"
 compatibility_flags = [ "nodejs_compat" ]
 
-browser = { binding = "FETCHER" }
-
 [[r2_buckets]]
 binding = 'BUCKET'
 bucket_name = 'screenshots'
 preview_bucket_name = 'screenshots'
-
-[vars]
-BUCKET_URL = "https://pub-e8437b1e2c4143f08e6c2d73aa7e26de.r2.dev"
