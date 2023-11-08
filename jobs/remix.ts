@@ -100,6 +100,7 @@ You'll re-write the following landing page headings${
 Limit prose.
 Keep headings the same length.
 Retain the order of headings.
+Return only the new copy; no formatting.
       `;
       const prompt = `${prefix.trim()}\n\nHeadings:\n${headings.join("\n")}`;
 
