@@ -140,7 +140,7 @@ Return the new copy directly; no prose nor formatting.
       });
 
       const finalScreenshotStatus = await io.createStatus("remix", {
-        label: "Waiting for second screenshot",
+        label: "Remixing page...",
         state: "loading",
       });
 
