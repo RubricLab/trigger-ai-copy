@@ -50,7 +50,13 @@ function Dashboard() {
     setEventId(res.id);
   }, [validUrl, voice]);
 
-  const { statuses, fetchStatus } = useEventRunStatuses(eventId);
+  const { statuses, fetchStatus, run } = useEventRunStatuses(eventId);
+
+  useEffect(() => {
+    if (run?.status === "FAILURE") {
+      toast.error(run.output.message || "Something went wrong");
+    }
+  }, [run]);
 
   useEffect(() => {
     if (fetchStatus === "success") setLoading(false);
