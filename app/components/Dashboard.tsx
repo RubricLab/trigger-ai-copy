@@ -9,7 +9,7 @@ import { Button } from "./Button";
 import { useEventRunStatuses } from "@trigger.dev/react";
 import { toast } from "sonner";
 import { Slider } from "./Slider";
-import { nanoid } from "nanoid";
+import { v4 as uuidv4 } from "uuid";
 
 const voices: Array<{ label: string; value: string }> = [
   { label: "✨ Useful", value: "useful" },
@@ -44,7 +44,7 @@ function Dashboard() {
     const res = await callTrigger({
       url: validUrl,
       voice,
-      id: nanoid(),
+      id: uuidv4(),
     });
 
     setEventId(res.id);
