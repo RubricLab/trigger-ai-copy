@@ -36,24 +36,22 @@ client.defineJob({
 
       // Fetch initial screenshot in parallel with other tasks
       io.runTask("initial-screenshot", async () => {
-        await fetch(workerUrl, {
+        const res = await fetch(workerUrl, {
           method: "POST",
           body: JSON.stringify({ url }),
-        })
-          .then((res) => {
-            if (res.status > 200) throw new Error(res.statusText);
-            return res.json();
-          })
-          .then(({ fileUrl }) => {
-            initialScreenshotStatus.update("screenshotted", {
-              label: "Initial screenshot",
-              state: "success",
-              data: {
-                url: fileUrl,
-              },
-            });
-          })
-          .catch(io.logger.error);
+        });
+
+        if (res.status > 200) throw new Error(res.statusText);
+
+        const { fileUrl } = await res.json();
+
+        initialScreenshotStatus.update("screenshotted", {
+          label: "Initial screenshot",
+          state: "success",
+          data: {
+            url: fileUrl,
+          },
+        });
       });
 
       const fetchHeadingsStatus = await io.createStatus("headings", {
@@ -131,14 +129,14 @@ Return the new copy directly.
           text,
         }));
 
+      const finalScreenshotStatus = await io.createStatus("remix", {
+        label: "Remixing page",
+        state: "loading",
+      });
+
       aiStatus.update("new-headings-complete", {
         label: "Generated new headings with OpenAI",
         state: "success",
-      });
-
-      const finalScreenshotStatus = await io.createStatus("remix", {
-        label: "Remixing page...",
-        state: "loading",
       });
 
       await io.runTask("new-screenshot", async () => {
