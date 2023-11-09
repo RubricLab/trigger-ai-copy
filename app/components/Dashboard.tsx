@@ -30,7 +30,17 @@ function Dashboard() {
     { key: string; toastId: string | number }[]
   >([]);
 
+  const { statuses, fetchStatus, run } = useEventRunStatuses(eventId);
+
   const validUrl = useMemo(() => validateUrl(pageUrl), [pageUrl]);
+  const remixedUrl = useMemo<string>(
+    () => statuses?.find(({ key }) => key == "remix")?.data?.url as string,
+    [statuses]
+  );
+  const screenshotUrl = useMemo<string>(
+    () => statuses?.find(({ key }) => key == "screenshot")?.data?.url as string,
+    [statuses]
+  );
 
   const submit = useCallback(async () => {
     if (!validUrl) return;
@@ -48,8 +58,6 @@ function Dashboard() {
 
     setEventId(res.id);
   }, [validUrl, voice]);
-
-  const { statuses, fetchStatus, run } = useEventRunStatuses(eventId);
 
   useEffect(() => {
     if (run?.status === "FAILURE") {
@@ -168,36 +176,29 @@ function Dashboard() {
             leftLabel="Before"
             rightLabel="After"
             value={[progress]}
-            disabled={!statuses?.find(({ key }) => key == "remix")?.data}
+            disabled={!remixedUrl}
             className={cn("w-64 mr-4", { "opacity-0": !submitted })}
             onValueChange={(value) => setProgress(value[0] || 0)}
           />
           <div />
         </div>
         <div className="relative grow p-0.5 pt-0 max-h-full overflow-y-scroll">
-          {!statuses?.find(({ key }) => key == "screenshot")?.data
-            ?.url ? null : (
+          {screenshotUrl ? (
             <>
               <img
-                src={
-                  statuses?.find(({ key }) => key == "remix")?.data
-                    ?.url as string
-                }
+                src={remixedUrl}
                 className="transition-opacity absolute rounded-b-md"
                 style={{ opacity: progress }}
                 alt="New website screenshot"
               />
               <img
-                src={
-                  statuses?.find(({ key }) => key == "screenshot")?.data
-                    ?.url as string
-                }
+                src={screenshotUrl}
                 className="transition-opacity absolute rounded-b-md"
                 style={{ opacity: 1 - progress }}
                 alt="Website screenshot"
               />
             </>
-          )}
+          ) : null}
         </div>
       </div>
     </form>

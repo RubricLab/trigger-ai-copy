@@ -1,7 +1,7 @@
 "use client";
 
 import { Cross2Icon } from "@radix-ui/react-icons";
-import React, { useEffect, useId, useState } from "react";
+import React, { useEffect, useId, useRef, useState } from "react";
 
 type Props = {
   label?: string;
@@ -31,12 +31,19 @@ function Input({
   const [value, setValue] = useState(initialValue || "");
   const inputId = useId();
 
+  const inputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     onChange?.(value);
   }, [value]);
 
+  // Focus input on first load
+  useEffect(() => {
+    if (inputRef.current) inputRef.current.focus();
+  }, []);
+
   return (
-    <div className="space-y-0.5 w-full max-w-xs group">
+    <div className="space-y-0.5 w-full max-w-sm group">
       {label && (
         <label className="font-medium text-sm text-dimmed" htmlFor={inputId}>
           {label}
@@ -44,6 +51,7 @@ function Input({
       )}
       <div className="relative">
         <input
+          ref={inputRef}
           id={inputId}
           value={value}
           name={name}
