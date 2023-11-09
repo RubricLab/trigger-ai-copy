@@ -24,7 +24,7 @@ function Dashboard() {
   const [eventId, setEventId] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [voice, setVoice] = useState("useful");
+  const [voice, setVoice] = useState("pirate");
   const [progress, setProgress] = useState(0);
   const [_, setActiveToasts] = useState<
     { key: string; toastId: string | number }[]
