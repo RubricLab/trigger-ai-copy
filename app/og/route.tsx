@@ -30,8 +30,12 @@ export async function GET(request: Request) {
     );
   }
 
-  const fontData = await fetch(
+  const poppinsMedium = await fetch(
     new URL("/public/Poppins-Medium.ttf", import.meta.url)
+  ).then((res) => res.arrayBuffer());
+
+  const poppinsSemibold = await fetch(
+    new URL("/public/Poppins-SemiBold.ttf", import.meta.url)
   ).then((res) => res.arrayBuffer());
 
   return new ImageResponse(
@@ -41,32 +45,52 @@ export async function GET(request: Request) {
           alignItems: "center",
           display: "flex",
           flexDirection: "column",
+          background: "black",
           height: "100%",
           width: "100%",
           justifyContent: "flex-start",
           overflowY: "hidden",
+          padding: "2rem",
+          paddingBottom: 0,
           position: "relative",
         }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={image} alt="Screenshot of website" />
         <div
           style={{
-            background: "black",
-            borderRadius: "0.5rem",
+            width: "100%",
             color: "white",
-            fontSize: "1rem",
-            padding: "0.5rem",
-            paddingLeft: "0.75rem",
-            paddingRight: "0.75rem",
-            position: "absolute",
-            right: "0.5rem",
-            bottom: "0.5rem",
+            padding: "2rem",
             display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
-          copyai.rubric.sh
+          <span
+            style={{
+              fontSize: "2rem",
+              fontWeight: 600,
+            }}
+          >
+            Remix your landing page copy with AI
+          </span>
+          <span
+            style={{
+              fontWeight: 500,
+              color: "#94A3B8",
+            }}
+          >
+            Try it at copyai.rubric.sh
+          </span>
         </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          style={{
+            borderRadius: "1rem",
+          }}
+          src={image}
+          alt="Screenshot of website"
+        />
       </div>
     ),
     {
@@ -75,8 +99,14 @@ export async function GET(request: Request) {
       fonts: [
         {
           name: "Poppins",
-          data: fontData,
+          data: poppinsMedium,
+          weight: 500,
+        },
+        {
+          name: "Poppins",
+          data: poppinsSemibold,
           style: "normal",
+          weight: 600,
         },
       ],
     }
