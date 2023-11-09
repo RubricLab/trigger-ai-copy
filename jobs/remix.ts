@@ -95,7 +95,7 @@ You'll remix the following landing page headings ${
       }!
 Keep headings roughly the same length.
 Keep headings in the same order.
-Return the new copy directly.
+Return the new copy directly, without formatting nor prose.
       `;
       const prompt = `${prefix.trim()}\n\nHeadings:\n${headings.join("\n")}`;
 

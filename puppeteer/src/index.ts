@@ -25,7 +25,7 @@ const worker = {
 			const fileUrl = `${env.BUCKET_URL}/${fileName}`;
 
 			const cachedFile = await env.BUCKET.get(fileName);
-			// if (cachedFile && !newHeadings) return new Response(fileUrl);
+			if (cachedFile && !newHeadings) return new Response(fileUrl);
 
 			const browserWSEndpoint = `wss://chrome.browserless.io?token=${env.BROWSERLESS_KEY}`;
 			const browser = await puppeteer.connect({
@@ -54,6 +54,26 @@ const worker = {
 					}
 				}
 			}
+
+			// Add watermark
+			await page.evaluate(() => {
+				//@ts-ignore document not defined
+				const watermark = document.createElement("div");
+				watermark.style.cssText = `
+					position: fixed;
+					top: 0.5rem;
+					left: 50%;
+					transform: translateX(-50%);
+					padding: 0.5rem 1rem 0.5rem 1rem;
+					background: black;
+					border-radius: 5px;
+					z-index: 999;
+				`;
+				watermark.innerText = "Made with Trigger.dev";
+
+				//@ts-ignore document not defined
+				document.body.appendChild(watermark);
+			});
 
 			// Take a screenshot
 			const screenshotBuffer = await page.screenshot({
