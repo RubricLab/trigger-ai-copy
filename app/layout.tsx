@@ -12,6 +12,16 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: "Copy Prettifier",
   description: "Improve your landing page copy with AI.",
+  openGraph: {
+    images: [
+      {
+        url: "/og",
+        width: 1200,
+        height: 630,
+        alt: "Screenshot of website",
+      },
+    ],
+  },
 };
 
 export default function RootLayout({

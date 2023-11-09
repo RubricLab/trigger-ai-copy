@@ -30,6 +30,10 @@ export async function GET(request: Request) {
     );
   }
 
+  const fontData = await fetch(
+    new URL("/public/Poppins-Medium.ttf", import.meta.url)
+  ).then((res) => res.arrayBuffer());
+
   return new ImageResponse(
     (
       <div
@@ -68,6 +72,13 @@ export async function GET(request: Request) {
     {
       width: 1200,
       height: 630,
+      fonts: [
+        {
+          name: "Poppins",
+          data: fontData,
+          style: "normal",
+        },
+      ],
     }
   );
 }
