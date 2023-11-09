@@ -170,7 +170,7 @@ function Dashboard() {
             rightLabel="After"
             value={[progress]}
             disabled={!statuses?.find(({ key }) => key == "remix")?.data}
-            className="w-56 mr-4"
+            className={cn("w-64 mr-4", { "opacity-0": !submitted })}
             onValueChange={(value) => setProgress(value[0] || 0)}
           />
           <div />
