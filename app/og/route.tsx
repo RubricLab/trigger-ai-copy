@@ -1,12 +1,11 @@
 import { ImageResponse } from "next/og";
-import { NextRequest } from "next/server";
 import { validateUrl } from "../utils";
 import { voices } from "../constants";
 import { Voice } from "../types";
 
 export const runtime = "edge";
 
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const url = searchParams.get("url");
   const voice = searchParams.get("voice") as Voice;
