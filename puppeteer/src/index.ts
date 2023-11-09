@@ -59,16 +59,8 @@ const worker = {
 			await page.evaluate(() => {
 				//@ts-ignore document not defined
 				const watermark = document.createElement("div");
-				watermark.style.cssText = `
-					position: fixed;
-					top: 0.5rem;
-					left: 50%;
-					transform: translateX(-50%);
-					padding: 0.5rem 1rem 0.5rem 1rem;
-					background: black;
-					border-radius: 5px;
-					z-index: 999;
-				`;
+				watermark.style.cssText =
+					"position: fixed; top: 0.5rem; right: 0.5rem; padding: 0.5rem 1rem 0.5rem 1rem; background: black; border-radius: 5px; z-index: 999;";
 				watermark.innerText = "Made with Trigger.dev";
 
 				//@ts-ignore document not defined

@@ -3,45 +3,64 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Input from "./Input";
-import { cn, validateUrl } from "@/utils";
+import { cn, copyToClipboard, validateUrl } from "@/app/utils";
 import { callTrigger } from "../actions";
 import { Button } from "./Button";
 import { useEventRunStatuses } from "@trigger.dev/react";
 import { toast } from "sonner";
 import { Slider } from "./Slider";
 import { v4 as uuidv4 } from "uuid";
+import { useRouter } from "next/navigation";
+import { Toast, Voice } from "@/app/types";
+import { voices } from "@/app/constants";
+import { Link2Icon } from "@radix-ui/react-icons";
 
-const voices: Array<{ label: string; value: string }> = [
-  { label: "🏴‍☠️ Pirate", value: "pirate" },
-  { label: "🎭 Shakespeare", value: "shakespeare" },
-  { label: "🎤 Rhyming", value: "rhyming" },
-  { label: "🧙 Yoda", value: "yoda" },
-  { label: "🖕 Swearing", value: "curse words" },
-  { label: "✨ Useful", value: "useful" },
-];
+type Props = {
+  url?: string;
+  voice?: Voice;
+};
 
-function Dashboard() {
-  const [pageUrl, setPageUrl] = useState("");
+function Dashboard({ url, voice }: Props) {
+  const [pageUrl, setPageUrl] = useState(url || "");
   const [eventId, setEventId] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [voice, setVoice] = useState("pirate");
+  const [selectedVoice, setSelectedVoice] = useState<Voice>(voice || "pirate");
   const [progress, setProgress] = useState(0);
-  const [_, setActiveToasts] = useState<
-    { key: string; toastId: string | number }[]
-  >([]);
+  const [_, setActiveToasts] = useState<Toast[]>([]);
 
-  const { statuses, fetchStatus, run } = useEventRunStatuses(eventId);
+  const router = useRouter();
+
+  const { statuses, run } = useEventRunStatuses(eventId);
 
   const validUrl = useMemo(() => validateUrl(pageUrl), [pageUrl]);
-  const remixedUrl = useMemo<string>(
-    () => statuses?.find(({ key }) => key == "remix")?.data?.url as string,
-    [statuses]
-  );
   const screenshotUrl = useMemo<string>(
     () => statuses?.find(({ key }) => key == "screenshot")?.data?.url as string,
     [statuses]
   );
+
+  // Allow screenshot URL to be passed from search params
+  const remixedUrl = useMemo<string>(() => {
+    if (url) {
+      const parsedUrl = validateUrl(url);
+      if (parsedUrl) {
+        const siteName = new URL(parsedUrl)
+          .toString()
+          .replace(/https:\/\//g, "")
+          .replace(/\.|\//g, "");
+        const fileName = `${siteName}${
+          selectedVoice ? "-" + selectedVoice : ""
+        }.jpeg`;
+        const fileUrl = `${process.env.NEXT_PUBLIC_BUCKET_URL}/${fileName}`;
+
+        setProgress(1);
+
+        return fileUrl;
+      }
+    }
+
+    return statuses?.find(({ key }) => key == "remix")?.data?.url as string;
+  }, [statuses, selectedVoice, url]);
 
   const submit = useCallback(async () => {
     if (!validUrl) return;
@@ -53,22 +72,23 @@ function Dashboard() {
 
     const res = await callTrigger({
       url: validUrl,
-      voice,
+      voice: voices[selectedVoice].value,
       id: uuidv4(),
     });
 
     setEventId(res.id);
-  }, [validUrl, voice]);
+  }, [validUrl, selectedVoice]);
 
   useEffect(() => {
     if (run?.status === "FAILURE") {
       toast.error(run.output.message || "Something went wrong");
+      setLoading(false);
+    } else if (run?.status === "SUCCESS") {
+      toast.success("Check out your new copy!");
+      setProgress(1);
+      setLoading(false);
     }
   }, [run]);
-
-  useEffect(() => {
-    if (fetchStatus === "success") setLoading(false);
-  }, [fetchStatus]);
 
   useEffect(() => {
     if (statuses?.length == 0) {
@@ -81,7 +101,6 @@ function Dashboard() {
         const toastId = toast(status.label);
 
         setActiveToasts((curr) => [...curr, { toastId, key: status.key }]);
-
         toast.loading(status.label, { id: toastId, duration: 15 * 1000 });
       } else {
         setActiveToasts((curr) => {
@@ -91,21 +110,22 @@ function Dashboard() {
             id: toastId || undefined,
             duration: 3000,
           });
-
           toast.dismiss(toastId);
 
           return [...curr.filter((t) => t.key !== status.key)];
         });
       }
     });
-  }, [statuses, setActiveToasts]);
-
-  useEffect(() => {
-    if (statuses?.find(({ key }) => key == "remix")?.data) {
-      toast.success("Check out your new copy!");
-      setProgress(1);
-    }
   }, [statuses]);
+
+  const copyLink = useCallback(() => {
+    const args = { url: pageUrl, voice: selectedVoice };
+    const params = new URLSearchParams([...Object.entries(args)]);
+
+    copyToClipboard(`${window.location.origin}?${params}`);
+
+    toast.success("Copied to clipboard");
+  }, [pageUrl, selectedVoice]);
 
   return (
     <form
@@ -118,20 +138,21 @@ function Dashboard() {
           className={cn({ "!ring-green-400/60": validUrl })}
           placeholder="Enter a URL"
           onChange={setPageUrl}
+          initialValue={pageUrl}
           clearable
         />
         <div className="flex flex-col justify-end space-y-0.5">
-          <div className="text-midnight-400 text-sm">
+          <div className="text-dimmed text-sm">
             What type of copy do you want?
           </div>
           <div className="flex items-end relative divide-midnight-650 divide-x">
-            {voices.map((item) => (
+            {Object.entries(voices).map(([key, item]) => (
               <button
-                key={item.label}
-                onClick={() => setVoice(item.value)}
+                key={key}
+                onClick={() => setSelectedVoice(key as Voice)}
                 className={cn(
                   "whitespace-nowrap text-dimmed text-sm h-10 px-4 first:rounded-l-md last:rounded-r-md",
-                  voice === item.value
+                  key == selectedVoice
                     ? "bg-midnight-700"
                     : "bg-midnight-800 hover:bg-midnight-750"
                 )}
@@ -148,19 +169,19 @@ function Dashboard() {
       </div>
       <div
         className={cn(
-          "w-full grow h-full flex flex-col rounded-lg",
+          "w-full grow h-full relative flex flex-col rounded-lg",
           submitted ? "border-2 border-midnight-800" : "border-dashed-wide"
         )}
       >
         <div
           className={cn(
-            "h-10 rounded-t-lg w-full flex items-center justify-between",
+            "h-10 rounded-t-lg w-full flex items-center justify-between px-4",
             submitted
               ? "border-b-2 border-midnight-800 bg-midnight-800"
-              : "border-dashed-wide p-0.5"
+              : "border-dashed-wide py-0.5"
           )}
         >
-          <div className="flex items-center gap-1.5 pl-3">
+          <div className="flex items-center gap-1.5">
             {Array(3)
               .fill(0)
               .map((_, i) => (
@@ -183,24 +204,35 @@ function Dashboard() {
           />
           <div />
         </div>
-        <div className="relative grow p-0.5 pt-0 max-h-full overflow-y-scroll">
+        <div className="relative grow rounded-b-xl max-h-full mb-0.5 overflow-x-hidden overflow-y-scroll">
           {screenshotUrl ? (
-            <>
-              <img
-                src={remixedUrl}
-                className="transition-opacity absolute rounded-b-md"
-                style={{ opacity: progress }}
-                alt="New website screenshot"
-              />
-              <img
-                src={screenshotUrl}
-                className="transition-opacity absolute rounded-b-md"
-                style={{ opacity: 1 - progress }}
-                alt="Website screenshot"
-              />
-            </>
+            <img
+              src={screenshotUrl}
+              className="transition-opacity absolute px-0.5"
+              style={{ opacity: 1 - progress }}
+              alt="Website screenshot"
+            />
+          ) : null}
+          {remixedUrl ? (
+            <img
+              src={remixedUrl}
+              className="transition-opacity absolute px-0.5"
+              style={{ opacity: progress }}
+              alt="New website screenshot"
+            />
           ) : null}
         </div>
+        <Button
+          size="sm"
+          className="absolute top-12 right-2"
+          variant="secondary"
+          disabled={!remixedUrl}
+          onClick={copyLink}
+          type="button"
+        >
+          <span>Share</span>
+          <Link2Icon className="w-5 h-5 ml-2" />
+        </Button>
       </div>
     </form>
   );
