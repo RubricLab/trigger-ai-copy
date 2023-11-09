@@ -107,7 +107,7 @@ function Dashboard() {
         <Input
           label="Your landing page:"
           className={cn({ "!ring-green-400/60": validUrl })}
-          placeholder="trigger.dev"
+          placeholder="Enter a URL"
           onChange={setPageUrl}
           clearable
         />

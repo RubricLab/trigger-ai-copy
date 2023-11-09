@@ -4,7 +4,7 @@ import { z } from "zod";
 import { load } from "cheerio";
 
 const MAX_HEADING_LENGTH = 200;
-const MAX_HEADING_COUNT = 10;
+const MAX_HEADING_COUNT = 20;
 
 const workerUrl = process.env.WORKER_URL || "";
 
