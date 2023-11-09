@@ -25,7 +25,7 @@ const worker = {
 			const fileUrl = `${env.BUCKET_URL}/${fileName}`;
 
 			const cachedFile = await env.BUCKET.get(fileName);
-			// if (cachedFile && !newHeadings) return new Response(fileName);
+			if (cachedFile && !newHeadings) return new Response(fileName);
 
 			const browserWSEndpoint = `wss://chrome.browserless.io?token=${env.BROWSERLESS_KEY}`;
 			const browser = await puppeteer.connect({
