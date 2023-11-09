@@ -12,12 +12,11 @@ import { Slider } from "./Slider";
 import { v4 as uuidv4 } from "uuid";
 
 const voices: Array<{ label: string; value: string }> = [
-  { label: "✨ Useful", value: "useful" },
+  { label: "🏴‍☠️ Pirate", value: "pirate" },
   { label: "🎭 Shakespeare", value: "shakespeare" },
   { label: "🎤 Rhyming", value: "rhyming" },
   { label: "🧙 Yoda", value: "yoda" },
-  { label: "🏴‍☠️ Pirate", value: "pirate" },
-  { label: "✏️ Haiku", value: "haiku" },
+  { label: "✨ Useful", value: "useful" },
 ];
 
 function Dashboard() {
