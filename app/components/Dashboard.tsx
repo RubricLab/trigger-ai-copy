@@ -10,10 +10,10 @@ import { useEventRunStatuses } from "@trigger.dev/react";
 import { toast } from "sonner";
 import { Slider } from "./Slider";
 import { v4 as uuidv4 } from "uuid";
-import { useRouter } from "next/navigation";
 import { Toast, Voice } from "@/app/types";
 import { voices } from "@/app/constants";
 import { Link2Icon } from "@radix-ui/react-icons";
+import { useRouter } from "next/navigation";
 
 type Props = {
   url?: string;
@@ -21,6 +21,8 @@ type Props = {
 };
 
 function Dashboard({ url, voice }: Props) {
+  const router = useRouter();
+
   const [pageUrl, setPageUrl] = useState(url || "");
   const [eventId, setEventId] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -28,8 +30,6 @@ function Dashboard({ url, voice }: Props) {
   const [selectedVoice, setSelectedVoice] = useState<Voice>(voice || "pirate");
   const [progress, setProgress] = useState(0);
   const [_, setActiveToasts] = useState<Toast[]>([]);
-
-  const router = useRouter();
 
   const { statuses, run } = useEventRunStatuses(eventId);
 
@@ -48,8 +48,8 @@ function Dashboard({ url, voice }: Props) {
           .toString()
           .replace(/https:\/\//g, "")
           .replace(/\.|\//g, "");
-        const fileName = `${siteName}${
-          selectedVoice ? "-" + selectedVoice : ""
+        const fileName = `${siteName}-${
+          voice ? voices[voice].value : "index"
         }.jpeg`;
         const fileUrl = `${process.env.NEXT_PUBLIC_BUCKET_URL}/${fileName}`;
 
@@ -60,10 +60,16 @@ function Dashboard({ url, voice }: Props) {
     }
 
     return statuses?.find(({ key }) => key == "remix")?.data?.url as string;
-  }, [statuses, selectedVoice, url]);
+  }, [statuses, voice, url]);
 
   const submit = useCallback(async () => {
     if (!validUrl) return;
+
+    // Reset state
+    const url = new URL(window.location.href);
+    url.searchParams.delete("url");
+    url.searchParams.delete("voice");
+    router.replace(url.toString());
 
     setEventId("");
     setLoading(true);
@@ -77,7 +83,7 @@ function Dashboard({ url, voice }: Props) {
     });
 
     setEventId(res.id);
-  }, [validUrl, selectedVoice]);
+  }, [validUrl, selectedVoice, router]);
 
   useEffect(() => {
     if (run?.status === "FAILURE") {
@@ -222,17 +228,19 @@ function Dashboard({ url, voice }: Props) {
             />
           ) : null}
         </div>
-        <Button
-          size="sm"
-          className="absolute top-12 right-2"
-          variant="secondary"
-          disabled={!remixedUrl}
-          onClick={copyLink}
-          type="button"
-        >
-          <span>Share</span>
-          <Link2Icon className="w-5 h-5 ml-2" />
-        </Button>
+        {remixedUrl ? (
+          <Button
+            size="sm"
+            className="absolute top-12 right-2"
+            variant="secondary"
+            disabled={!remixedUrl}
+            onClick={copyLink}
+            type="button"
+          >
+            <span>Share</span>
+            <Link2Icon className="w-5 h-5 ml-2" />
+          </Button>
+        ) : null}
       </div>
     </form>
   );
