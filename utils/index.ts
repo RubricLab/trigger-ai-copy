@@ -33,3 +33,10 @@ export const validateUrl = (url: string): string | null => {
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+export function copyToClipboard(text: string) {
+  if (typeof window === "undefined") return;
+  if (!("navigator" in window)) return;
+
+  navigator.clipboard.writeText(text);
+}
