@@ -16,6 +16,7 @@ const voices: Array<{ label: string; value: string }> = [
   { label: "🎭 Shakespeare", value: "shakespeare" },
   { label: "🎤 Rhyming", value: "rhyming" },
   { label: "🧙 Yoda", value: "yoda" },
+  { label: "🖕 Swearing", value: "curse words" },
   { label: "✨ Useful", value: "useful" },
 ];
 
