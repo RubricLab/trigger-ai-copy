@@ -1,5 +1,5 @@
 import { TriggerProvider } from "@trigger.dev/react";
-import "./globals.css";
+import "./styles.css";
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import { Toaster } from "sonner";
