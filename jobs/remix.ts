@@ -43,7 +43,7 @@ client.defineJob({
 
         if (res.status > 200) throw new Error(res.statusText);
 
-        const { fileUrl } = await res.json();
+        const fileUrl = await res.text();
 
         initialScreenshotStatus.update("screenshotted", {
           label: "Initial screenshot",
@@ -64,7 +64,7 @@ client.defineJob({
       const data = await page.text();
 
       const queryFunction = load(data, {}, false);
-      const headingElements = queryFunction("h1, h2, h3");
+      const headingElements = queryFunction("h1, h2, h3, p");
 
       let headings: string[] = [];
 
@@ -151,7 +151,7 @@ Return the new copy directly.
 
         if (res.status > 200) throw new Error(res.statusText);
 
-        const { fileUrl } = await res.json();
+        const fileUrl = await res.text();
 
         await finalScreenshotStatus.update("remixed", {
           label: "New screenshot",

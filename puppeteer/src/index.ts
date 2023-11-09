@@ -25,7 +25,7 @@ const worker = {
 			const fileUrl = `${env.BUCKET_URL}/${fileName}`;
 
 			const cachedFile = await env.BUCKET.get(fileName);
-			if (cachedFile && !newHeadings) return new Response(fileName);
+			// if (cachedFile && !newHeadings) return new Response(fileUrl);
 
 			const browserWSEndpoint = `wss://chrome.browserless.io?token=${env.BROWSERLESS_KEY}`;
 			const browser = await puppeteer.connect({
@@ -34,7 +34,7 @@ const worker = {
 
 			const page = await browser.newPage();
 
-			await page.setViewport({ width: 1280, height: 960 });
+			await page.setViewport({ width: 1280, height: 1920 });
 			await page.goto(url, {
 				waitUntil: "networkidle2",
 				timeout: 30 * 1000,
@@ -42,7 +42,7 @@ const worker = {
 
 			// Loop over and replace headings if applicable
 			if (newHeadings) {
-				const headings = await page.$$("h1, h2, h3");
+				const headings = await page.$$("h1, h2, h3, p");
 
 				for (const newHeading of newHeadings) {
 					if (newHeading.id < headings.length) {
@@ -66,7 +66,7 @@ const worker = {
 
 			await browser.close();
 
-			return new Response(JSON.stringify({ fileUrl }));
+			return new Response(fileUrl);
 		} catch (error) {
 			console.error("Failed to reach browser", error);
 			return new Response("Failed to reach browser", { status: 500 });
