@@ -21,7 +21,7 @@ const worker = {
 
 			const url = new URL(pageUrl).toString();
 			const siteName = url.replace(/https:\/\//g, "").replace(/\.|\//g, "");
-			const fileName = `${siteName}${voice ? "-" + voice : ""}.jpeg`;
+			const fileName = `${siteName}-${voice || "index"}.jpeg`;
 			const fileUrl = `${env.BUCKET_URL}/${fileName}`;
 
 			const cachedFile = await env.BUCKET.get(fileName);
@@ -54,18 +54,6 @@ const worker = {
 					}
 				}
 			}
-
-			// Add watermark
-			await page.evaluate(() => {
-				//@ts-ignore document not defined
-				const watermark = document.createElement("div");
-				watermark.style.cssText =
-					"position: fixed; top: 0.5rem; right: 0.5rem; padding: 0.5rem 1rem 0.5rem 1rem; background: black; border-radius: 5px; z-index: 999;";
-				watermark.innerText = "Made with Trigger.dev";
-
-				//@ts-ignore document not defined
-				document.body.appendChild(watermark);
-			});
 
 			// Take a screenshot
 			const screenshotBuffer = await page.screenshot({
