@@ -34,7 +34,7 @@ const worker = {
 
 			const page = await browser.newPage();
 
-			await page.setViewport({ width: 1280, height: 960 });
+			await page.setViewport({ width: 1280, height: 1920 });
 			await page.goto(url, {
 				waitUntil: "networkidle2",
 				timeout: 30 * 1000,
@@ -42,7 +42,7 @@ const worker = {
 
 			// Loop over and replace headings if applicable
 			if (newHeadings) {
-				const headings = await page.$$("h1, h2, h3");
+				const headings = await page.$$("h1, h2, h3, p");
 
 				for (const newHeading of newHeadings) {
 					if (newHeading.id < headings.length) {
