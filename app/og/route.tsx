@@ -5,8 +5,6 @@ import { voices } from "../constants";
 import { Voice } from "../types";
 
 export const runtime = "edge";
-export const alt = "Screenshot of website";
-export const contentType = "image/png";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -48,7 +46,7 @@ export async function GET(request: NextRequest) {
         }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={image} alt={alt} />
+        <img src={image} alt="Screenshot of website" />
         <div
           style={{
             background: "black",
