@@ -12,6 +12,11 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: "Copy AI",
   description: "Improve your landing page copy with AI.",
+  metadataBase: new URL(
+    process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : `http://localhost:${process.env.PORT || 3000}`
+  ),
 };
 
 export default function RootLayout({
