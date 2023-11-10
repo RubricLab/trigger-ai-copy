@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
-import { validateUrl } from "../utils";
-import { voices } from "../constants";
-import { Voice } from "../types";
+import { validateUrl } from "./utils";
+import { voices } from "./constants";
+import { Voice } from "./types";
 
 export const runtime = "edge";
 
