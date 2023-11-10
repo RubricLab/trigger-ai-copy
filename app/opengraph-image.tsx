@@ -4,11 +4,14 @@ import { voices } from "./constants";
 import { Voice } from "./types";
 
 export const runtime = "edge";
+export const contentType = "image/png";
+export const size = {
+  height: 630,
+  width: 1200,
+};
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const url = searchParams.get("url");
-  const voice = searchParams.get("voice") as Voice;
+export default async function Image({ searchParams }: any) {
+  const { url, voice } = searchParams;
 
   let image: any;
 
@@ -20,7 +23,7 @@ export async function GET(request: Request) {
         .replace(/https:\/\//g, "")
         .replace(/\.|\//g, "");
       const fileName = `${siteName}-${
-        voice ? voices[voice].value : "index"
+        voice ? voices[voice as Voice].value : "index"
       }.jpeg`;
       image = `${process.env.NEXT_PUBLIC_BUCKET_URL}/${fileName}`;
     }
@@ -94,8 +97,7 @@ export async function GET(request: Request) {
       </div>
     ),
     {
-      width: 1200,
-      height: 630,
+      ...size,
       fonts: [
         {
           name: "Poppins",
