@@ -18,17 +18,13 @@
     "@trigger.dev/openai": "^2.2.4",
     "@trigger.dev/react": "^2.2.4",
     "@trigger.dev/sdk": "^2.2.4",
-    "@types/node": "20.5.9",
-    "@types/react": "^18.2.28",
-    "@types/react-dom": "^18.2.13",
     "@vercel/og": "^0.5.20",
     "autoprefixer": "10.4.15",
     "cheerio": "^1.0.0-rc.12",
     "class-variance-authority": "^0.7.0",
     "encoding": "^0.1.13",
-    "eslint": "8.48.0",
     "eslint-config-next": "13.4.19",
-    "next": "^14.0.1",
+    "next": "^14.0.2",
     "postcss": "8.4.29",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -43,6 +39,10 @@
     "endpointId": "jobs-NnF0"
   },
   "devDependencies": {
-    "@types/uuid": "^9.0.7"
+    "@types/node": "^20.9.0",
+    "@types/react": "^18.2.37",
+    "@types/react-dom": "^18.2.15",
+    "@types/uuid": "^9.0.7",
+    "eslint": "^8.53.0"
   }
 }
