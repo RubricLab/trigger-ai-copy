@@ -8,7 +8,7 @@ function Header() {
     <header className="w-screen h-20 border-b border-slate-800 fixed top-0 z-10 bg-midnight-900">
       <div className="flex items-center justify-between h-full px-12 text-midnight-400">
         <div className="flex items-baseline gap-2">
-          <Link href="/" target="_blank">
+          <Link href="/">
             <h1 className="text-2xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
               LandingPageCopyGenerator
             </h1>
