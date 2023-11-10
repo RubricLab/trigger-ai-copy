@@ -125,10 +125,7 @@ function Dashboard({ url, voice }: Props) {
   }, [statuses]);
 
   const copyLink = useCallback(() => {
-    const args = { url: pageUrl, voice: selectedVoice };
-    const params = new URLSearchParams([...Object.entries(args)]);
-
-    copyToClipboard(`${window.location.origin}?${params}`);
+    copyToClipboard(`${window.location.origin}/${pageUrl}/${selectedVoice}`);
 
     toast.success("Copied to clipboard");
   }, [pageUrl, selectedVoice]);

@@ -1,4 +1,7 @@
 import { ImageResponse } from "next/og";
+import { validateUrl } from "@/app/utils";
+import { voices } from "@/app/constants";
+import { Voice } from "@/app/types";
 
 export const runtime = "edge";
 export const contentType = "image/png";
@@ -7,10 +10,37 @@ export const size = {
   width: 1200,
 };
 
-export default async function Image() {
-  const image = await fetch(new URL("/public/og.png", import.meta.url)).then(
-    (res) => res.arrayBuffer()
-  );
+type Props = {
+  params: {
+    url: string;
+    voice: Voice;
+  };
+};
+
+export default async function Image({ params }: Props) {
+  const { url, voice } = params;
+
+  let image: any;
+
+  if (url && voice) {
+    const parsedUrl = validateUrl(url);
+    if (parsedUrl) {
+      const siteName = new URL(parsedUrl)
+        .toString()
+        .replace(/https:\/\//g, "")
+        .replace(/\.|\//g, "");
+
+      const fileName = `${siteName}-${
+        voices[voice] ? voices[voice].value : "index"
+      }.jpeg`;
+
+      image = `${process.env.NEXT_PUBLIC_BUCKET_URL}/${fileName}`;
+    }
+  } else {
+    image = await fetch(new URL("/public/og.png", import.meta.url)).then(
+      (res) => res.arrayBuffer()
+    );
+  }
 
   const poppinsMedium = await fetch(
     new URL("/public/Poppins-Medium.ttf", import.meta.url)
@@ -70,7 +100,7 @@ export default async function Image() {
           style={{
             borderRadius: "1rem",
           }}
-          src={image as any} //
+          src={image}
           alt="Screenshot of website"
         />
       </div>
