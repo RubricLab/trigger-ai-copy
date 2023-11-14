@@ -23,6 +23,7 @@
     "class-variance-authority": "^0.7.0",
     "encoding": "^0.1.13",
     "eslint-config-next": "13.4.19",
+    "framer-motion": "^10.16.5",
     "next": "^14.0.2",
     "postcss": "8.4.29",
     "react": "^18.2.0",

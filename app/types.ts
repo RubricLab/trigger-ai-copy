@@ -23,3 +23,9 @@ export type Toast = {
   key: string;
   toastId: string | number;
 };
+
+export type Message = {
+  id: string;
+  body: string;
+  status: "error" | "success" | "info";
+};

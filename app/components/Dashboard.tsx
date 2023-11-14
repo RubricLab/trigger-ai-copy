@@ -7,13 +7,19 @@ import { cn, copyToClipboard, validateUrl } from "@/app/utils";
 import { callTrigger } from "../actions";
 import { Button } from "./Button";
 import { useEventRunStatuses } from "@trigger.dev/react";
-import { toast } from "sonner";
 import { Slider } from "./Slider";
-import { v4 as uuidv4 } from "uuid";
-import { Toast, Voice } from "@/app/types";
+import { v4 as uuid } from "uuid";
+import { Message, Voice } from "@/app/types";
 import { voices } from "@/app/constants";
-import { Link2Icon } from "@radix-ui/react-icons";
+import {
+  CheckIcon,
+  Cross1Icon,
+  Link2Icon,
+  ReloadIcon,
+} from "@radix-ui/react-icons";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { motion } from "framer-motion";
 
 type Props = {
   url?: string;
@@ -29,11 +35,12 @@ function Dashboard({ url, voice }: Props) {
   const [loading, setLoading] = useState(false);
   const [selectedVoice, setSelectedVoice] = useState<Voice>(voice || "pirate");
   const [progress, setProgress] = useState(0);
-  const [_, setActiveToasts] = useState<Toast[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
 
   const { statuses, run } = useEventRunStatuses(eventId);
 
   const validUrl = useMemo(() => validateUrl(pageUrl), [pageUrl]);
+
   const screenshotUrl = useMemo<string>(
     () => statuses?.find(({ key }) => key == "screenshot")?.data?.url as string,
     [statuses]
@@ -65,6 +72,11 @@ function Dashboard({ url, voice }: Props) {
   const submit = useCallback(async () => {
     if (!validUrl) return;
 
+    setMessages((curr) => [
+      ...curr,
+      { body: "Reaching Trigger.dev", status: "info", id: "init" },
+    ]);
+
     // Reset state
     const url = new URL(window.location.href);
     url.searchParams.delete("url");
@@ -79,7 +91,7 @@ function Dashboard({ url, voice }: Props) {
     const res = await callTrigger({
       url: validUrl,
       voice: voices[selectedVoice].value,
-      id: uuidv4(),
+      id: uuid(),
     });
 
     setEventId(res.id);
@@ -87,9 +99,19 @@ function Dashboard({ url, voice }: Props) {
 
   useEffect(() => {
     if (run?.status === "FAILURE") {
-      toast.error(run.output.message || "Something went wrong");
+      setMessages((curr) => {
+        return [
+          ...curr,
+          {
+            body: run.output.message || "Something went wrong",
+            status: "error",
+            id: run.id,
+          },
+        ];
+      });
       setLoading(false);
     } else if (run?.status === "SUCCESS") {
+      setMessages([]);
       toast.success("Check out your new copy!");
       setProgress(1);
       setLoading(false);
@@ -98,28 +120,20 @@ function Dashboard({ url, voice }: Props) {
 
   useEffect(() => {
     if (statuses?.length == 0) {
-      toast.success("Spin up Trigger");
-      return;
+      setMessages((curr) => [...curr.filter(({ id }) => id != "init")]);
     }
 
     statuses?.map((status) => {
       if (status.history.length === 0) {
-        const toastId = toast(status.label);
-
-        setActiveToasts((curr) => [...curr, { toastId, key: status.key }]);
-        toast.loading(status.label, { id: toastId, duration: 15 * 1000 });
+        setMessages((curr) => [
+          ...curr,
+          { body: status.label, status: "info", id: status.key },
+        ]);
       } else {
-        setActiveToasts((curr) => {
-          const toastId = curr.find((t) => t.key == status.key)?.toastId;
-
-          toast.success(status.label, {
-            id: toastId || undefined,
-            duration: 3000,
-          });
-          toast.dismiss(toastId);
-
-          return [...curr.filter((t) => t.key !== status.key)];
-        });
+        setMessages((curr) => [
+          ...curr.filter((message) => message.id !== status.key),
+          { body: status.label, status: "success", id: status.key },
+        ]);
       }
     });
   }, [statuses]);
@@ -132,7 +146,10 @@ function Dashboard({ url, voice }: Props) {
 
   return (
     <form
-      action={submit}
+      onSubmit={(e) => {
+        e.preventDefault();
+        submit();
+      }}
       className="w-full max-w-7xl h-full flex flex-col grow p-12 pt-32 space-y-12"
     >
       <div className="flex items-end justify-between flex-wrap w-full gap-4">
@@ -176,6 +193,35 @@ function Dashboard({ url, voice }: Props) {
           submitted ? "border-2 border-midnight-800" : "border-dashed-wide"
         )}
       >
+        {messages.length > 0 ? (
+          <div className="absolute border-midnight-800/80 border z-50 flex items-start gap-3 p-6 flex-col justify-start shadow-xl top-[25%] left-[50%] translate-x-[-50%] h-56 w-96 bg-midnight-950/90 rounded-lg">
+            {messages.map(({ body, status, id }) => (
+              <motion.div
+                key={id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className={cn(
+                  "flex items-center gap-2",
+                  status == "error"
+                    ? "text-red-500"
+                    : status == "success"
+                    ? "text-green-500"
+                    : "text-dimmed"
+                )}
+              >
+                {status == "error" ? (
+                  <Cross1Icon className="w-5 h-5" />
+                ) : status == "success" ? (
+                  <CheckIcon className="w-5 h-5" />
+                ) : (
+                  <ReloadIcon className="w-5 h-5 animate-spin" />
+                )}
+                <span>{body}</span>
+              </motion.div>
+            ))}
+          </div>
+        ) : null}
         <div
           className={cn(
             "h-10 rounded-t-lg w-full flex items-center justify-between px-4",
